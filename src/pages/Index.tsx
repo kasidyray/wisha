@@ -14,7 +14,8 @@ import {
   Share2, 
   Lock, 
   Download,
-  Heart
+  Heart,
+  PartyPopper
 } from 'lucide-react';
 
 const Index = () => {
@@ -26,41 +27,41 @@ const Index = () => {
       <Hero />
       
       {/* Features Section */}
-      <section className="py-20 bg-cream-50">
+      <section className="py-20 bg-slate-50">
         <div className="container max-w-7xl mx-auto px-4">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-blush-100 px-4 py-1 rounded-full mb-4">
+            <div className="inline-block bg-emerald-100 px-4 py-1 rounded-full mb-4">
               <span className="text-sm font-medium">Why choose Wisha</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
               Collect memories in multiple formats
             </h2>
             <p className="text-lg text-muted-foreground">
-              Let your loved ones share their heartfelt wishes in the way that feels most personal to them.
+              Let your friends and family share their heartfelt wishes in the way that feels most personal to them.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <FeatureCard 
-              icon={<MessageCircle className="h-6 w-6 text-foreground" />}
+              icon={<MessageCircle className="h-6 w-6 text-indigo-600" />}
               title="Text Messages"
               description="Simple written messages and wishes from your guests."
               delay={0.1}
             />
             <FeatureCard 
-              icon={<Image className="h-6 w-6 text-foreground" />}
+              icon={<Image className="h-6 w-6 text-indigo-600" />}
               title="Photo Uploads"
               description="Share beautiful memories through photos and images."
               delay={0.2}
             />
             <FeatureCard 
-              icon={<Video className="h-6 w-6 text-foreground" />}
+              icon={<Video className="h-6 w-6 text-indigo-600" />}
               title="Video Messages"
               description="Capture personal video messages from anywhere in the world."
               delay={0.3}
             />
             <FeatureCard 
-              icon={<Mic className="h-6 w-6 text-foreground" />}
+              icon={<Mic className="h-6 w-6 text-indigo-600" />}
               title="Audio Recordings"
               description="Voice messages to hear the emotion in every wish."
               delay={0.4}
@@ -73,30 +74,30 @@ const Index = () => {
       <section className="py-20">
         <div className="container max-w-7xl mx-auto px-4">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-champagne-100 px-4 py-1 rounded-full mb-4">
+            <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full mb-4">
               <span className="text-sm font-medium">Simple process</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
               How Wisha works
             </h2>
             <p className="text-lg text-muted-foreground">
-              Collecting beautiful memories from your loved ones has never been easier.
+              Collecting beautiful memories from your friends and family has never been easier.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-serif">1</span>
               </div>
               <h3 className="text-xl font-serif font-medium mb-2">Create your event</h3>
               <p className="text-muted-foreground mb-4">
-                Set up your wedding event in less than a minute. Customize it with your wedding details.
+                Set up your event in less than a minute. Customize it with your event details.
               </p>
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-serif">2</span>
               </div>
               <h3 className="text-xl font-serif font-medium mb-2">Share your unique link</h3>
@@ -106,7 +107,7 @@ const Index = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-serif">3</span>
               </div>
               <h3 className="text-xl font-serif font-medium mb-2">Collect memories</h3>
@@ -125,10 +126,10 @@ const Index = () => {
       </section>
       
       {/* Preview Section */}
-      <section className="py-20 bg-blush-50">
+      <section className="py-20 bg-emerald-50">
         <div className="container max-w-7xl mx-auto px-4">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-blush-200 px-4 py-1 rounded-full mb-4">
+            <div className="inline-block bg-emerald-200 px-4 py-1 rounded-full mb-4">
               <span className="text-sm font-medium">Preview</span>
             </div>
             <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
@@ -142,13 +143,13 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <MessageCard 
               name="Emma Johnson"
-              message="Wishing you both all the love and happiness in the world! Your love story has been an inspiration to us all."
+              message="Happy birthday! Wishing you all the joy and happiness today and always. So glad to be celebrating you!"
               date="2 days ago"
             />
             
             <MessageCard 
               name="David Chen"
-              message="Congratulations on your special day! May your love continue to grow stronger with each passing day."
+              message="Congratulations on your graduation! All your hard work has finally paid off. We're all so proud of you!"
               date="1 day ago"
               mediaType="image"
               mediaUrl="/placeholder.svg"
@@ -156,7 +157,7 @@ const Index = () => {
             
             <MessageCard 
               name="Sophia Williams"
-              message="I'm so happy for you both! Sorry I couldn't be there in person, but I'm sending you all my love."
+              message="Best wishes on your retirement! Looking forward to hearing about all your new adventures."
               date="5 hours ago"
               mediaType="audio"
             />
@@ -170,20 +171,20 @@ const Index = () => {
           <div className="flex flex-col lg:flex-row items-center">
             <div className="w-full lg:w-1/2 mb-12 lg:mb-0">
               <div className="max-w-lg">
-                <div className="inline-block bg-champagne-100 px-4 py-1 rounded-full mb-4">
+                <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full mb-4">
                   <span className="text-sm font-medium">Why you'll love it</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
                   More than just messages
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8">
-                  Wisha provides a comprehensive solution for collecting and preserving heartfelt wishes from your loved ones.
+                  Wisha provides a comprehensive solution for collecting and preserving heartfelt wishes from your friends and family.
                 </p>
                 
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="bg-cream-100 p-2 rounded-lg mr-4">
-                      <Share2 className="h-5 w-5 text-foreground" />
+                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+                      <Share2 className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
                       <h3 className="font-medium mb-1">Easy Sharing</h3>
@@ -194,8 +195,8 @@ const Index = () => {
                   </div>
                   
                   <div className="flex items-start">
-                    <div className="bg-cream-100 p-2 rounded-lg mr-4">
-                      <Lock className="h-5 w-5 text-foreground" />
+                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+                      <Lock className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
                       <h3 className="font-medium mb-1">Privacy & Moderation</h3>
@@ -206,8 +207,8 @@ const Index = () => {
                   </div>
                   
                   <div className="flex items-start">
-                    <div className="bg-cream-100 p-2 rounded-lg mr-4">
-                      <Download className="h-5 w-5 text-foreground" />
+                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+                      <Download className="h-5 w-5 text-indigo-600" />
                     </div>
                     <div>
                       <h3 className="font-medium mb-1">Download & Keep</h3>
@@ -222,23 +223,23 @@ const Index = () => {
             
             <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md">
-                <div className="absolute -top-6 -left-6 w-full h-full bg-blush-100 rounded-3xl transform rotate-6"></div>
-                <div className="absolute -bottom-6 -right-6 w-full h-full bg-champagne-200 rounded-3xl transform -rotate-3"></div>
+                <div className="absolute -top-6 -left-6 w-full h-full bg-emerald-100 rounded-3xl transform rotate-6"></div>
+                <div className="absolute -bottom-6 -right-6 w-full h-full bg-indigo-200 rounded-3xl transform -rotate-3"></div>
                 
                 <div className="relative bg-white p-8 rounded-3xl shadow-lg">
                   <img 
                     src="/placeholder.svg" 
-                    alt="Wedding couple" 
+                    alt="Birthday celebration" 
                     className="w-full h-64 object-cover rounded-xl mb-6"
                   />
                   
                   <div className="flex justify-between mb-4">
                     <div>
-                      <h3 className="font-serif font-medium text-lg">Jessica & Andrew</h3>
+                      <h3 className="font-serif font-medium text-lg">Alex's Birthday</h3>
                       <p className="text-sm text-muted-foreground">May 15, 2025</p>
                     </div>
-                    <div className="bg-cream-100 h-10 w-10 rounded-full flex items-center justify-center">
-                      <Heart className="h-5 w-5 text-blush-500" />
+                    <div className="bg-indigo-100 h-10 w-10 rounded-full flex items-center justify-center">
+                      <PartyPopper className="h-5 w-5 text-indigo-500" />
                     </div>
                   </div>
                   
@@ -264,10 +265,10 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-20 bg-champagne-100">
+      <section className="py-20 bg-indigo-100">
         <div className="container max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-serif font-light mb-6 max-w-2xl mx-auto">
-            Ready to collect beautiful memories for your special day?
+            Ready to collect beautiful memories for your special occasion?
           </h2>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Create your own Wisha event in minutes and start collecting heartfelt messages from your loved ones.
@@ -287,21 +288,21 @@ const Index = () => {
             <div className="mb-6 md:mb-0">
               <h2 className="text-2xl font-serif font-semibold">Wisha</h2>
               <p className="text-sm text-muted-foreground mt-1">
-                Collect and cherish wedding wishes
+                Collect and cherish memories for any occasion
               </p>
             </div>
             
             <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-              <Link to="/" className="text-sm hover:text-champagne-500 transition-colors">
+              <Link to="/" className="text-sm hover:text-indigo-500 transition-colors">
                 Home
               </Link>
-              <Link to="/how-it-works" className="text-sm hover:text-champagne-500 transition-colors">
+              <Link to="/how-it-works" className="text-sm hover:text-indigo-500 transition-colors">
                 How It Works
               </Link>
-              <Link to="/pricing" className="text-sm hover:text-champagne-500 transition-colors">
+              <Link to="/pricing" className="text-sm hover:text-indigo-500 transition-colors">
                 Pricing
               </Link>
-              <Link to="/create-event" className="text-sm hover:text-champagne-500 transition-colors">
+              <Link to="/create-event" className="text-sm hover:text-indigo-500 transition-colors">
                 Create Event
               </Link>
             </div>
@@ -312,13 +313,13 @@ const Index = () => {
               © {new Date().getFullYear()} Wisha. All rights reserved.
             </p>
             <div className="flex space-x-6">
-              <a href="#" className="text-xs text-muted-foreground hover:text-champagne-500 transition-colors">
+              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
                 Privacy Policy
               </a>
-              <a href="#" className="text-xs text-muted-foreground hover:text-champagne-500 transition-colors">
+              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
                 Terms of Service
               </a>
-              <a href="#" className="text-xs text-muted-foreground hover:text-champagne-500 transition-colors">
+              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
                 Contact
               </a>
             </div>

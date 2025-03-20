@@ -19,20 +19,20 @@ const CreateEvent = () => {
   };
   
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       
       <div className="pt-28 pb-20 px-4">
         <div className="container max-w-7xl mx-auto">
           <div className="text-center mb-12 max-w-3xl mx-auto animate-slide-down">
-            <div className="inline-block bg-blush-100 px-4 py-1 rounded-full mb-4">
+            <div className="inline-block bg-emerald-100 px-4 py-1 rounded-full mb-4">
               <span className="text-sm font-medium">Start collecting memories</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-serif font-light mb-6">
               Create your event
             </h1>
             <p className="text-lg text-muted-foreground">
-              Set up your wedding event to start collecting beautiful messages from your loved ones.
+              Set up your event to start collecting beautiful messages from your friends and family.
             </p>
           </div>
           
@@ -45,7 +45,7 @@ const CreateEvent = () => {
         <div className="container max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-xl font-serif">💡</span>
               </div>
               <h3 className="text-lg font-serif font-medium mb-2">Choose a Clear Name</h3>
@@ -55,7 +55,7 @@ const CreateEvent = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-xl font-serif">📆</span>
               </div>
               <h3 className="text-lg font-serif font-medium mb-2">Set the Right Date</h3>
@@ -65,7 +65,7 @@ const CreateEvent = () => {
             </div>
             
             <div className="text-center">
-              <div className="w-12 h-12 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-xl font-serif">✉️</span>
               </div>
               <h3 className="text-lg font-serif font-medium mb-2">Personal Welcome</h3>

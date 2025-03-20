@@ -27,11 +27,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isDisabled = disabled || loading;
 
     const variants = {
-      primary: 'bg-champagne-300 text-foreground hover:bg-champagne-400 transition-all duration-300 shadow-sm hover:shadow',
-      secondary: 'bg-blush-100 text-foreground hover:bg-blush-200 transition-all duration-300 shadow-sm hover:shadow',
-      outline: 'bg-transparent border border-champagne-300 text-foreground hover:bg-champagne-50 transition-all duration-300',
-      ghost: 'bg-transparent hover:bg-champagne-50 text-foreground transition-all duration-300',
-      link: 'bg-transparent underline-offset-4 hover:underline text-foreground p-0 h-auto transition-all duration-300'
+      primary: 'bg-indigo-500 text-white hover:bg-indigo-600 transition-all duration-300 shadow-sm hover:shadow',
+      secondary: 'bg-emerald-500 text-white hover:bg-emerald-600 transition-all duration-300 shadow-sm hover:shadow',
+      outline: 'bg-transparent border border-indigo-400 text-indigo-600 hover:bg-indigo-50 transition-all duration-300',
+      ghost: 'bg-transparent hover:bg-indigo-50 text-indigo-600 transition-all duration-300',
+      link: 'bg-transparent underline-offset-4 hover:underline text-indigo-600 p-0 h-auto transition-all duration-300'
     };
 
     const sizes = {
@@ -45,7 +45,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           'font-medium inline-flex items-center justify-center relative',
-          variant !== 'link' && 'focus:ring-2 focus:ring-champagne-200 focus:outline-none',
+          variant !== 'link' && 'focus:ring-2 focus:ring-indigo-200 focus:outline-none',
           variants[variant],
           sizes[size],
           fullWidth && 'w-full',

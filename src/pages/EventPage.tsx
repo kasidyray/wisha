@@ -63,17 +63,17 @@ const EventPage = () => {
   };
   
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Event Header */}
       <div className="bg-white shadow-sm">
         <div className="container max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center mb-4 md:mb-0">
-              <div className="w-12 h-12 bg-champagne-300 rounded-full flex items-center justify-center mr-4">
-                <span className="font-serif font-semibold">S&J</span>
+              <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center mr-4 text-white">
+                <span className="font-serif font-semibold">AG</span>
               </div>
               <div>
-                <h1 className="text-2xl font-serif font-medium">Sarah & John's Wedding</h1>
+                <h1 className="text-2xl font-serif font-medium">Alex's Graduation</h1>
                 <p className="text-sm text-muted-foreground">May 15, 2025</p>
               </div>
             </div>
@@ -82,18 +82,18 @@ const EventPage = () => {
               <button 
                 className={`px-4 py-2 rounded-md transition-colors ${
                   activeTab === 'form' 
-                    ? 'bg-champagne-200 text-foreground' 
-                    : 'bg-transparent hover:bg-champagne-100'
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'bg-transparent hover:bg-indigo-50'
                 }`}
                 onClick={() => setActiveTab('form')}
               >
-                Leave a Wish
+                Leave a Message
               </button>
               <button 
                 className={`px-4 py-2 rounded-md transition-colors ${
                   activeTab === 'gallery' 
-                    ? 'bg-champagne-200 text-foreground' 
-                    : 'bg-transparent hover:bg-champagne-100'
+                    ? 'bg-indigo-100 text-indigo-700' 
+                    : 'bg-transparent hover:bg-indigo-50'
                 }`}
                 onClick={() => setActiveTab('gallery')}
               >
@@ -109,10 +109,10 @@ const EventPage = () => {
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8 animate-slide-down">
               <h2 className="text-2xl font-serif font-light mb-4">
-                Send your wishes to the happy couple
+                Send your wishes to Alex
               </h2>
               <p className="text-muted-foreground">
-                Share your congratulations, advice, or memories with Sarah & John.
+                Share your congratulations, advice, or memories with Alex for their graduation.
               </p>
             </div>
             
@@ -127,7 +127,7 @@ const EventPage = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-champagne-200 transition-all"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
                   required
                 />
               </div>
@@ -142,7 +142,7 @@ const EventPage = () => {
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Write your message here..."
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-champagne-200 transition-all"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
                   required
                 />
               </div>
@@ -158,7 +158,7 @@ const EventPage = () => {
                       onClick={() => setMediaType('image')}
                       className={`flex items-center px-3 py-2 rounded-md text-sm ${
                         mediaType === 'image' 
-                          ? 'bg-champagne-200 text-foreground' 
+                          ? 'bg-indigo-100 text-indigo-700' 
                           : 'bg-gray-100 hover:bg-gray-200 text-muted-foreground'
                       }`}
                     >
@@ -170,7 +170,7 @@ const EventPage = () => {
                       onClick={() => setMediaType('video')}
                       className={`flex items-center px-3 py-2 rounded-md text-sm ${
                         mediaType === 'video' 
-                          ? 'bg-champagne-200 text-foreground' 
+                          ? 'bg-indigo-100 text-indigo-700' 
                           : 'bg-gray-100 hover:bg-gray-200 text-muted-foreground'
                       }`}
                     >
@@ -182,7 +182,7 @@ const EventPage = () => {
                       onClick={() => setMediaType('audio')}
                       className={`flex items-center px-3 py-2 rounded-md text-sm ${
                         mediaType === 'audio' 
-                          ? 'bg-champagne-200 text-foreground' 
+                          ? 'bg-indigo-100 text-indigo-700' 
                           : 'bg-gray-100 hover:bg-gray-200 text-muted-foreground'
                       }`}
                     >
@@ -215,7 +215,7 @@ const EventPage = () => {
                   loading={isSubmitting}
                   icon={<Send className="w-4 h-4" />}
                 >
-                  Send Wishes
+                  Send Message
                 </Button>
               </div>
             </form>
@@ -224,23 +224,23 @@ const EventPage = () => {
           <div className="animate-fade-in">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-serif font-light mb-4">
-                Gallery of Wishes
+                Gallery of Messages
               </h2>
               <p className="text-muted-foreground">
-                See all the beautiful messages shared with Sarah & John.
+                See all the beautiful messages shared with Alex.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <MessageCard 
                 name="Emma Johnson"
-                message="Wishing you both all the love and happiness in the world! Your love story has been an inspiration to us all."
+                message="Congratulations on your graduation! Your hard work and dedication have finally paid off. So proud of you!"
                 date="2 days ago"
               />
               
               <MessageCard 
                 name="David Chen"
-                message="Congratulations on your special day! May your love continue to grow stronger with each passing day."
+                message="What an amazing achievement! Wishing you all the best in your future endeavors. The world is yours to conquer!"
                 date="1 day ago"
                 mediaType="image"
                 mediaUrl="/placeholder.svg"
@@ -248,20 +248,20 @@ const EventPage = () => {
               
               <MessageCard 
                 name="Sophia Williams"
-                message="I'm so happy for you both! Sorry I couldn't be there in person, but I'm sending you all my love."
+                message="I'm so happy for you! Sorry I couldn't be there in person, but I'm sending you all my love and congratulations."
                 date="5 hours ago"
                 mediaType="audio"
               />
               
               <MessageCard 
                 name="James Wilson"
-                message="Here's to a lifetime of love, laughter, and adventure together! Congratulations on your wedding day!"
+                message="Congratulations on this incredible milestone! Your perseverance and determination have been truly inspiring."
                 date="3 days ago"
               />
               
               <MessageCard 
                 name="Olivia Martinez"
-                message="May your marriage be filled with all the right ingredients: a heap of love, a dash of humor, a touch of romance, and a spoonful of understanding."
+                message="As you celebrate your graduation, remember that this is just the beginning of an exciting journey ahead. Congrats!"
                 date="4 days ago"
                 mediaType="image"
                 mediaUrl="/placeholder.svg"
@@ -269,7 +269,7 @@ const EventPage = () => {
               
               <MessageCard 
                 name="Michael Brown"
-                message="Congratulations to the beautiful couple! May the years ahead be filled with lasting joy."
+                message="Here's to your success! May your degree open doors to amazing opportunities. Congratulations, graduate!"
                 date="1 week ago"
                 mediaType="video"
                 mediaUrl="/placeholder.svg"
@@ -278,7 +278,7 @@ const EventPage = () => {
             
             <div className="flex justify-center mt-10">
               <Button onClick={() => setActiveTab('form')}>
-                Add Your Wishes
+                Add Your Message
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,35 +9,35 @@
 
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 40 10% 15%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-    --card: 40 33% 99%;
-    --card-foreground: 40 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 40 33% 99%;
-    --popover-foreground: 40 10% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 40 50% 96%;
-    --primary-foreground: 40 10% 15%;
+    --primary: 354 84% 57%; /* Airbnb red */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 10 30% 95%;
-    --secondary-foreground: 10 20% 20%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 40 10% 40%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 350 60% 95%;
-    --accent-foreground: 350 30% 40%;
+    --accent: 354 84% 95%; /* Light variant of Airbnb red */
+    --accent-foreground: 354 84% 57%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 40 20% 90%;
-    --input: 40 20% 90%;
-    --ring: 40 30% 85%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 354 84% 57%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem; /* Slightly more rounded */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -49,33 +50,37 @@
   }
 
   .dark {
-    --background: 40 10% 10%;
-    --foreground: 40 10% 92%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
 
-    --card: 40 10% 12%;
-    --card-foreground: 40 10% 92%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 40 10% 12%;
-    --popover-foreground: 40 10% 92%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 40 10% 15%;
-    --primary-foreground: 40 10% 92%;
+    --primary: 354 84% 57%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 10 20% 15%;
-    --secondary-foreground: 10 20% 92%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 40 10% 20%;
-    --muted-foreground: 40 10% 70%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    --accent: 350 30% 20%;
-    --accent-foreground: 350 60% 80%;
+    --accent: 354 84% 20%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 40 10% 25%;
-    --input: 40 10% 25%;
-    --ring: 40 10% 35%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 354 84% 57%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
@@ -84,17 +89,21 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans;
-  }
-
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-sans font-medium;
   }
 }
 
 /* Custom utility classes */
 @layer components {
+  .airbnb-card {
+    @apply bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-200;
+  }
+  
+  .airbnb-button {
+    @apply bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200;
+  }
+  
   .glass-card {
     @apply bg-white bg-opacity-30 backdrop-blur-lg border border-white border-opacity-20 rounded-lg shadow-sm;
   }
@@ -113,6 +122,31 @@
   
   .page-transition-exit-active {
     @apply opacity-0 transition-opacity duration-300;
+  }
+
+  /* Airbnb-like animations */
+  .airbnb-hover-scale {
+    @apply transition-transform duration-300 ease-out hover:scale-102 hover:-translate-y-1;
+  }
+
+  .airbnb-hover-shadow {
+    @apply transition-all duration-300 ease-out hover:shadow-lg;
+  }
+
+  .airbnb-icon-button {
+    @apply rounded-full p-2 transition-all duration-200 hover:bg-accent;
+  }
+
+  .airbnb-search-bar {
+    @apply rounded-full border shadow-sm transition-shadow duration-200 hover:shadow-md focus-within:shadow-md;
+  }
+
+  .airbnb-tab {
+    @apply relative inline-block px-4 py-2 font-medium text-gray-600 transition-colors duration-200 hover:text-black;
+  }
+
+  .airbnb-tab.active {
+    @apply text-primary after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary after:content-[''];
   }
 }
 
@@ -138,20 +172,146 @@ html {
   transform: translateY(0);
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* Custom scrollbar - REMOVED */
+/* The custom scrollbar styles were here and have been removed */
+
+/* Adding animation delay utility classes */
+.animation-delay-500 {
+  animation-delay: 500ms;
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+.animation-delay-1000 {
+  animation-delay: 1000ms;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+.animation-delay-1500 {
+  animation-delay: 1500ms;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+.animation-delay-2000 {
+  animation-delay: 2000ms;
 }
+
+/* Airbnb animations */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes ping-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+.animate-ping-slow {
+  animation: ping-slow 3s ease-in-out infinite;
+}
+
+/* Scale utility for hover effects */
+.scale-102 {
+  --tw-scale-x: 1.02;
+  --tw-scale-y: 1.02;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  
+  .font-handwriting {
+    font-family: 'Caveat', cursive;
+    font-size: 1.25rem;
+  }
+  
+  .font-quicklnk {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-quicklnk-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  /* Hide scrollbars but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+  
+  /* Custom radial gradient utility */
+  .radial-gradient {
+    background: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
+    opacity: 0.85;
+    filter: blur(80px);
+  }
+  
+  /* Twitter-style modal animation */
+  @keyframes growFromButton {
+    0% {
+      transform: translate(-50%, 50%) scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 1;
+    }
+  }
+
+  .twitter-modal {
+    animation: growFromButton 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    transform-origin: bottom center;
+    position: fixed;
+    left: 50%;
+    bottom: 16%; 
+    transform: translate(-50%, 0);
+    margin: 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Hide scrollbars but keep functionality - REMOVED */
+/* These classes were previously used to hide scrollbars but maintain functionality */
+/* They have been removed to use default browser scrollbars */

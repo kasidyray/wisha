@@ -1,227 +1,240 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Button from '@/components/Button';
-import { Copy, Share2, Settings, Download, Eye, Heart, MessageCircle, Image, Video, Mic } from 'lucide-react';
-import { toast } from 'sonner';
-
-interface EventData {
-  id: string;
-  name: string;
-  date: string;
-  messageCount: number;
-  shareLink: string;
-  imageCount: number;
-  videoCount: number;
-  audioCount: number;
-}
+import { format } from 'date-fns';
+import { 
+  PlusCircle, 
+  Calendar, 
+  User, 
+  Gift, 
+  ChevronRight
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { 
+  mockEvents, 
+  mockActivities, 
+  getCurrentUser,
+  type ActivityItem
+} from '@/lib/mockData';
 
 const Dashboard = () => {
-  const [events, setEvents] = useState<EventData[]>([
-    {
-      id: '1',
-      name: "Sarah & John's Wedding",
-      date: 'May 15, 2025',
-      messageCount: 24,
-      shareLink: 'wisha.app/e/sarah-john',
-      imageCount: 12,
-      videoCount: 5,
-      audioCount: 7
-    }
-  ]);
-  
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Link copied to clipboard!');
-  };
+  const currentUser = getCurrentUser();
   
   return (
-    <div className="min-h-screen bg-cream-50">
-      <Navbar />
-      
-      <div className="pt-28 pb-20 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-12">
+    <div className="min-h-screen bg-gradient-to-b from-background to-gray-50">
+      {/* Header */}
+      <header className="border-b bg-white shadow-sm">
+        <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
+                W
+              </div>
+              <span className="text-xl font-bold">Wisha</span>
+            </Link>
+          </div>
+          <div>
+            <UserAvatar user={currentUser} />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="container max-w-6xl mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-serif font-medium mb-2">Your Dashboard</h1>
-              <p className="text-muted-foreground">
-                Manage your events and view collected wishes
+              <h1 className="text-2xl font-bold mb-2">Welcome back, {currentUser.name.split(' ')[0]}!</h1>
+              <p className="text-gray-600">
+                Manage your events and wishlists all in one place.
               </p>
             </div>
-            
             <Link to="/create-event">
-              <Button className="mt-4 md:mt-0">
+              <Button variant="airbnb" size="lg" className="whitespace-nowrap">
+                <PlusCircle className="mr-2 h-5 w-5" />
                 Create New Event
               </Button>
             </Link>
           </div>
-          
-          {events.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 animate-fade-in">
-              {events.map((event) => (
-                <div 
-                  key={event.id}
-                  className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
-                >
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between">
-                      <div className="mb-4 md:mb-0">
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 bg-champagne-200 rounded-full flex items-center justify-center mr-4">
-                            <span className="font-serif font-semibold">S&J</span>
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-serif font-medium">{event.name}</h3>
-                            <p className="text-sm text-muted-foreground">{event.date}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        <button 
-                          onClick={() => copyToClipboard(`https://${event.shareLink}`)}
-                          className="flex items-center px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
-                        >
-                          <Copy className="w-4 h-4 mr-1" /> 
-                          Copy Link
-                        </button>
-                        <button className="flex items-center px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 transition-colors">
-                          <Share2 className="w-4 h-4 mr-1" /> 
-                          Share
-                        </button>
-                        <button className="flex items-center px-3 py-1.5 text-sm rounded-md bg-gray-100 hover:bg-gray-200 transition-colors">
-                          <Settings className="w-4 h-4 mr-1" /> 
-                          Settings
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                      <div className="space-y-6">
-                        <div className="flex items-center">
-                          <div className="w-12 h-12 bg-blush-100 rounded-full flex items-center justify-center mr-4">
-                            <Heart className="w-6 h-6 text-blush-500" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">Messages Received</h4>
-                            <p className="text-2xl font-serif">{event.messageCount}</p>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-3">Media Breakdown</h4>
-                          <div className="space-y-2">
-                            <div className="flex items-center">
-                              <Image className="w-4 h-4 text-champagne-500 mr-2" />
-                              <span className="text-sm">{event.imageCount} Photos</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Video className="w-4 h-4 text-blush-500 mr-2" />
-                              <span className="text-sm">{event.videoCount} Videos</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Mic className="w-4 h-4 text-cream-500 mr-2" />
-                              <span className="text-sm">{event.audioCount} Audio Messages</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-medium mb-3">Share Link</h4>
-                          <div className="flex items-center">
-                            <div className="flex-1 bg-gray-50 px-3 py-1.5 rounded-l-md border border-gray-200 text-sm truncate">
-                              https://{event.shareLink}
-                            </div>
-                            <button 
-                              onClick={() => copyToClipboard(`https://${event.shareLink}`)}
-                              className="px-3 py-1.5 bg-champagne-200 rounded-r-md border border-champagne-300 border-l-0"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-cream-50 rounded-xl p-6">
-                        <h4 className="font-medium mb-4">Quick Actions</h4>
-                        <div className="space-y-3">
-                          <Link to={`/events/${event.id}`}>
-                            <Button 
-                              variant="outline" 
-                              fullWidth 
-                              className="justify-start"
-                              icon={<Eye className="w-4 h-4" />}
-                            >
-                              View Event Page
-                            </Button>
-                          </Link>
-                          <Link to={`/events/${event.id}/gallery`}>
-                            <Button 
-                              variant="outline" 
-                              fullWidth 
-                              className="justify-start"
-                              icon={<MessageCircle className="w-4 h-4" />}
-                            >
-                              View Messages
-                            </Button>
-                          </Link>
-                          <Button 
-                            variant="outline" 
-                            fullWidth 
-                            className="justify-start"
-                            icon={<Download className="w-4 h-4" />}
-                          >
-                            Download All Messages
-                          </Button>
-                          <Link to={`/events/${event.id}/settings`}>
-                            <Button 
-                              variant="outline" 
-                              fullWidth 
-                              className="justify-start"
-                              icon={<Settings className="w-4 h-4" />}
-                            >
-                              Event Settings
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-cream-50 px-6 py-4 border-t border-gray-100">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-muted-foreground">
-                        Created on April 15, 2025
-                      </p>
-                      <Link to={`/events/${event.id}`} className="text-sm text-champagne-500 hover:text-champagne-600 transition-colors">
-                        View Details
-                      </Link>
-                    </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <Card className="hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium text-gray-600">Total Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="mr-4 rounded-full bg-[#FF385C]/10 p-3">
+                  <Calendar className="h-6 w-6 text-[#FF385C]" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">{mockEvents.length}</div>
+                  <div className="text-sm text-gray-500">
+                    Active events
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 bg-white rounded-xl border border-gray-100 animate-fade-in">
-              <div className="w-16 h-16 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-champagne-500" />
               </div>
-              <h2 className="text-xl font-serif font-medium mb-2">No Events Yet</h2>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Create your first event to start collecting beautiful wishes from your loved ones.
-              </p>
-              <Link to="/create-event">
-                <Button>
-                  Create Your First Event
-                </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium text-gray-600">Participants</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="mr-4 rounded-full bg-[#FF385C]/10 p-3">
+                  <User className="h-6 w-6 text-[#FF385C]" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">
+                    {mockEvents.reduce((sum, event) => sum + event.participantCount, 0)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Across all events
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow duration-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-medium text-gray-600">Items</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="mr-4 rounded-full bg-[#FF385C]/10 p-3">
+                  <Gift className="h-6 w-6 text-[#FF385C]" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">
+                    {mockEvents.reduce((sum, event) => sum + event.itemCount, 0)}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    In your wishlists
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Your Events */}
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Your Events</h2>
+            <Link to="/create-event" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
+              View All
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mockEvents.map((event) => (
+              <Link to={`/events/${event.id}`} key={event.id}>
+                <Card className="h-full hover:shadow-md transition-all duration-200 overflow-hidden border-none hover:-translate-y-1">
+                  <div className="aspect-[4/3] relative overflow-hidden">
+                    <img 
+                      src={event.coverImage || 'https://placehold.co/600x400'} 
+                      alt={event.title}
+                      className="w-full h-full object-cover rounded-t-xl"
+                    />
+                    <div className="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-xs font-medium shadow-sm">
+                      {event.type}
+                    </div>
+                  </div>
+                  <CardContent className="p-5">
+                    <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
+                    <p className="text-gray-500 text-sm mb-3">{format(event.date, 'MMMM dd, yyyy')}</p>
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 mr-1" />
+                        {event.participantCount} people
+                      </div>
+                      <div className="flex items-center">
+                        <Gift className="h-4 w-4 mr-1" />
+                        {event.itemCount} items
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
-            </div>
-          )}
+            ))}
+
+            <Link to="/create-event">
+              <Card className="h-full border-dashed hover:shadow-md transition-all duration-200 flex flex-col justify-center items-center p-8 hover:bg-gray-50 hover:-translate-y-1">
+                <div className="w-16 h-16 rounded-full bg-[#FF385C]/10 flex items-center justify-center mb-4">
+                  <PlusCircle className="h-8 w-8 text-[#FF385C]" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Create New Event</h3>
+                <p className="text-gray-500 text-sm text-center">
+                  Set up your next special occasion
+                </p>
+              </Card>
+            </Link>
+          </div>
+        </div>
+
+        {/* Recent Activity Section */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
+          <Card>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {mockActivities.slice(0, 3).map((activity) => {
+                  const eventTitle = mockEvents.find(e => e.id === activity.eventId)?.title || '';
+                  const timeAgo = getTimeAgo(activity.date);
+                  
+                  return (
+                    <div key={activity.id} className="p-4 flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-[#FF385C]/20 flex items-center justify-center mr-4">
+                        {activity.type === 'join_event' && <User className="h-5 w-5 text-[#FF385C]" />}
+                        {activity.type === 'add_item' && <Gift className="h-5 w-5 text-[#FF385C]" />}
+                        {activity.type === 'update_event' && <Calendar className="h-5 w-5 text-[#FF385C]" />}
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {activity.type === 'join_event' && `${activity.userName} joined your event`}
+                          {activity.type === 'add_item' && `New item added to your wishlist`}
+                          {activity.type === 'update_event' && `Event ${activity.details || 'updated'}`}
+                        </p>
+                        <p className="text-sm text-gray-500">{eventTitle} • {timeAgo}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+            <CardFooter className="border-t bg-gray-50 py-3 px-4 rounded-b-xl">
+              <Link to="/activity" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
+                View All Activity
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </div>
   );
+};
+
+// Helper function to format time ago
+const getTimeAgo = (date: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffHours < 1) return 'just now';
+  if (diffHours === 1) return '1 hour ago';
+  if (diffHours < 24) return `${diffHours} hours ago`;
+  if (diffDays === 1) return '1 day ago';
+  return `${diffDays} days ago`;
 };
 
 export default Dashboard;

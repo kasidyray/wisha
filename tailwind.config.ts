@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -118,6 +117,14 @@ export default {
 					'0%': { transform: 'translateY(-20px)', opacity: '0' },
 					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
+				'slide-right': {
+					'0%': { transform: 'translateX(-20px)', opacity: '0' },
+					'100%': { transform: 'translateX(0)', opacity: '1' }
+				},
+				'slide-left': {
+					'0%': { transform: 'translateX(20px)', opacity: '0' },
+					'100%': { transform: 'translateX(0)', opacity: '1' }
+				},
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-10px)' }
@@ -134,12 +141,14 @@ export default {
 				'fade-out': 'fade-out 0.6s ease-out',
 				'slide-up': 'slide-up 0.6s ease-out',
 				'slide-down': 'slide-down 0.6s ease-out',
+				'slide-right': 'slide-right 0.6s ease-out',
+				'slide-left': 'slide-left 0.6s ease-out',
 				'float': 'float 6s ease-in-out infinite',
 				'pulse-soft': 'pulse-soft 4s ease-in-out infinite'
 			},
 			fontFamily: {
-				serif: ['Cormorant Garamond', 'serif'],
-				sans: ['Inter', 'sans-serif']
+				sans: ['Geist', 'sans-serif'],
+				mono: ['Geist Mono', 'monospace'],
 			}
 		}
 	},

@@ -1,170 +1,223 @@
-
-import React, { useState } from 'react';
-import { Calendar, Users, PartyPopper } from 'lucide-react';
-import Button from './Button';
+import React, { useState, useEffect } from 'react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from 'lucide-react';
 
 interface EventFormProps {
   onSubmit: (eventData: any) => void;
 }
 
 const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
+  const { user, checkUserExists, login, signup } = useAuth();
+  
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     eventName: '',
     eventType: 'birthday',
-    eventDate: '',
-    hostName: '',
-    email: '',
+    email: user?.email || '',
+    firstName: user?.name?.split(' ')[0] || '',
+    lastName: user?.name?.split(' ')[1] || '',
     password: '',
-    message: ''
   });
+  
+  const [userExists, setUserExists] = useState<boolean | null>(user ? true : null);
+  const [isCheckingUser, setIsCheckingUser] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  
+  // Reset userExists when email changes
+  useEffect(() => {
+    if (!formData.email) {
+      setUserExists(null);
+      return;
+    }
+  }, [formData.email]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Reset userExists when email changes
+    if (name === 'email') {
+      setUserExists(null);
+      setIsEditingEmail(true);
+    }
   };
   
-  const handleNext = () => {
-    setStep(step + 1);
+  const handleEventTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, eventType: value }));
+  };
+  
+  const handleNext = async () => {
+    if (step === 1) {
+      // Validate step 1
+      if (!formData.eventName || !formData.eventType) {
+        return;
+      }
+      
+      // If user is already logged in, submit directly
+      if (user) {
+        onSubmit(formData);
+        return;
+      }
+      
+      setStep(2);
+    } else if (step === 2) {
+      if (!formData.email) return;
+      
+      // Always check email when Next is clicked in step 2
+      if (userExists === null) {
+        setIsCheckingUser(true);
+        try {
+          const exists = await checkUserExists(formData.email);
+          setUserExists(exists);
+          setIsEditingEmail(false);
+          setIsCheckingUser(false);
+          // Don't proceed yet - let the UI update first
+          return;
+        } catch (error) {
+          console.error('Error checking user:', error);
+          setUserExists(false);
+          setIsCheckingUser(false);
+          return;
+        }
+      }
+      
+      // If already checked and auth fields are filled, submit
+      if (userExists !== null && 
+         ((userExists === true && formData.password) || 
+          (userExists === false && formData.firstName && formData.password))) {
+        await handleSubmit();
+      }
+    }
   };
   
   const handleBack = () => {
     setStep(step - 1);
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const handleSubmit = async () => {
+    // Don't proceed if still checking or if required fields are missing
+    if (isCheckingUser || userExists === null) {
+      return;
+    }
+    
+    // First authenticate or create user account
+    try {
+      if (userExists) {
+        // Login user with explicit redirect to avoid automatic redirects
+        await login(formData.email, formData.password, '/create-event');
+      } else {
+        // Register user with explicit redirect to avoid automatic redirects
+        const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+        await signup(formData.email, formData.password, fullName, '/create-event');
+      }
+      
+      // Add a small delay to ensure auth state is updated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Then submit event data
+      onSubmit(formData);
+    } catch (error) {
+      console.error('Authentication error:', error);
+      // Don't submit if auth fails
+    }
   };
   
   const eventTypes = [
-    { value: 'birthday', label: 'Birthday' },
-    { value: 'wedding', label: 'Wedding' },
-    { value: 'graduation', label: 'Graduation' },
-    { value: 'anniversary', label: 'Anniversary' },
-    { value: 'retirement', label: 'Retirement' },
-    { value: 'babyShower', label: 'Baby Shower' },
-    { value: 'farewell', label: 'Farewell' },
-    { value: 'other', label: 'Other' },
+    { value: 'birthday', label: 'Birthday & Celebrations', icon: '🎂' },
+    { value: 'wedding', label: 'Wedding', icon: '💍' },
+    { value: 'graduation', label: 'Graduation', icon: '🎓' },
+    { value: 'anniversary', label: 'Anniversary', icon: '💝' },
+    { value: 'retirement', label: 'Retirement', icon: '🏖️' },
+    { value: 'babyShower', label: 'Baby Shower', icon: '👶' },
+    { value: 'farewell', label: 'Farewell', icon: '👋' },
+    { value: 'other', label: 'Other Occasion...', icon: '🎭' },
   ];
   
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center w-full">
-              <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= i 
-                    ? 'bg-indigo-500 text-white' 
-                    : 'bg-gray-100 text-muted-foreground'
-                }`}
-              >
-                {i}
-              </div>
-              {i < 3 && (
-                <div 
-                  className={`flex-grow h-0.5 mx-2 ${
-                    step > i ? 'bg-indigo-500' : 'bg-gray-100'
-                  }`}
-                ></div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-between mt-2">
-          <div className="text-xs text-center w-1/3">Event Details</div>
-          <div className="text-xs text-center w-1/3">Account Setup</div>
-          <div className="text-xs text-center w-1/3">Customize</div>
-        </div>
+    <div className="w-full max-w-md mx-auto">
+      {/* Step indicator - horizontal lines */}
+      <div className="mb-8 flex">
+        <div 
+          className={`h-1 w-[200px] rounded-full transition-colors duration-300 ${step === 1 ? 'bg-[#FF385C]' : 'bg-gray-200'}`}
+        ></div>
+        <div className="mx-2"></div>
+        <div 
+          className={`h-1 w-[200px] rounded-full transition-colors duration-300 ${step === 2 ? 'bg-[#FF385C]' : 'bg-gray-200'}`}
+        ></div>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-2xl shadow-sm animate-fade-in">
+      <form className="space-y-6 animate-fade-in">
         {step === 1 && (
-          <div className="space-y-4 animate-fade-in">
-            <h2 className="text-2xl font-serif font-medium mb-6">Tell us about your event</h2>
-            
-            <div>
-              <label htmlFor="eventName" className="block mb-1 text-sm font-medium">
-                Event Name
-              </label>
-              <div className="relative">
-                <input
-                  id="eventName"
-                  name="eventName"
-                  type="text"
-                  placeholder="e.g., Alex's 30th Birthday"
-                  value={formData.eventName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                  required
-                />
+          <div className="space-y-5 animate-fade-in">
+            <div className="mb-8">
+              <div className="inline-block bg-[#FF385C]/10 px-4 py-1.5 rounded-full mb-4">
+                <span className="text-sm font-medium text-[#FF385C]">Start collecting memories</span>
               </div>
+              <h1 className="text-3xl font-medium mb-4">
+                Tell us about your event
+              </h1>
+              <p className="text-gray-500">
+                Set up your event to start collecting beautiful messages from your friends and family.
+              </p>
             </div>
             
             <div>
-              <label htmlFor="eventType" className="block mb-1 text-sm font-medium">
+              <label htmlFor="eventName" className="block mb-1.5 text-sm font-medium">
+                Event Name
+              </label>
+              <Input
+                id="eventName"
+                name="eventName"
+                type="text"
+                placeholder="e.g., Alex's 30th Birthday"
+                value={formData.eventName}
+                onChange={handleChange}
+                className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="eventType" className="block mb-1.5 text-sm font-medium">
                 Event Type
               </label>
               <div className="relative">
-                <PartyPopper className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <select
-                  id="eventType"
-                  name="eventType"
+                <Select
                   value={formData.eventType}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                  required
+                  onValueChange={handleEventTypeChange}
                 >
-                  {eventTypes.map(type => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full rounded-xl border-gray-200">
+                    <SelectValue placeholder="Select event type..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eventTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>
+                        <span className="flex items-center">
+                          <span className="mr-2 text-lg">{type.icon}</span>
+                          {type.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             
-            <div>
-              <label htmlFor="hostName" className="block mb-1 text-sm font-medium">
-                Host Name
-              </label>
-              <div className="relative">
-                <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  id="hostName"
-                  name="hostName"
-                  type="text"
-                  placeholder="e.g., Alex Smith"
-                  value={formData.hostName}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="eventDate" className="block mb-1 text-sm font-medium">
-                Event Date
-              </label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  id="eventDate"
-                  name="eventDate"
-                  type="date"
-                  value={formData.eventDate}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="pt-4">
-              <Button type="button" onClick={handleNext} fullWidth>
+            <div className="pt-6">
+              <Button 
+                type="button" 
+                onClick={handleNext} 
+                className="w-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
+              >
                 Continue
               </Button>
             </div>
@@ -172,80 +225,149 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
         )}
         
         {step === 2 && (
-          <div className="space-y-4 animate-fade-in">
-            <h2 className="text-2xl font-serif font-medium mb-6">Set up your account</h2>
+          <div className="space-y-5 animate-fade-in">
+            <div className="mb-8">
+              <div className="inline-block bg-[#FF385C]/10 px-4 py-1.5 rounded-full mb-4">
+                <span className="text-sm font-medium text-[#FF385C]">Almost there</span>
+              </div>
+              <h1 className="text-3xl font-medium mb-4">
+                Enter your email
+              </h1>
+              <p className="text-gray-500">
+                This will allow you to save, invite, and share your event.
+              </p>
+            </div>
             
             <div>
-              <label htmlFor="email" className="block mb-1 text-sm font-medium">
+              <label htmlFor="email" className="block mb-1.5 text-sm font-medium">
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
+                className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
                 required
               />
+              {formData.email && (
+                <div className="mt-2 flex items-center">
+                  {isCheckingUser ? (
+                    <div className="flex items-center text-sm text-gray-500">
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Checking account...
+                    </div>
+                  ) : userExists === true ? (
+                    <p className="text-green-600 text-sm">Looks like you're already registered with Wisha. Enter your password.</p>
+                  ) : userExists === false ? (
+                    <p className="text-blue-600 text-sm">Looks like you're new to Wisha. What name should we call you?</p>
+                  ) : null}
+                </div>
+              )}
             </div>
             
-            <div>
-              <label htmlFor="password" className="block mb-1 text-sm font-medium">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Choose a secure password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-                required
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Must be at least 8 characters
-              </p>
-            </div>
+            {userExists === true && (
+              <div>
+                <label htmlFor="password" className="block mb-1.5 text-sm font-medium">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                  required
+                />
+              </div>
+            )}
             
-            <div className="pt-4 flex space-x-4">
-              <Button type="button" variant="outline" onClick={handleBack}>
+            {userExists === false && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="firstName" className="block mb-1.5 text-sm font-medium">
+                      First Name
+                    </label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      type="text"
+                      placeholder="First name"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="block mb-1.5 text-sm font-medium">
+                      Last Name
+                    </label>
+                    <Input
+                      id="lastName"
+                      name="lastName"
+                      type="text"
+                      placeholder="Last name"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label htmlFor="password" className="block mb-1.5 text-sm font-medium">
+                    Set a password
+                  </label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Choose a secure password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    Must be at least 8 characters
+                  </p>
+                </div>
+              </>
+            )}
+            
+            <div className="pt-6 flex space-x-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleBack}
+                className="rounded-xl border-gray-200 hover:bg-gray-50"
+              >
                 Back
               </Button>
-              <Button type="button" onClick={handleNext} fullWidth>
-                Continue
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {step === 3 && (
-          <div className="space-y-4 animate-fade-in">
-            <h2 className="text-2xl font-serif font-medium mb-6">Customize your event</h2>
-            
-            <div>
-              <label htmlFor="message" className="block mb-1 text-sm font-medium">
-                Welcome Message (optional)
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                placeholder="Add a personal message for your guests..."
-                value={formData.message}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
-              />
-            </div>
-            
-            <div className="pt-4 flex space-x-4">
-              <Button type="button" variant="outline" onClick={handleBack}>
-                Back
-              </Button>
-              <Button type="submit" fullWidth>
-                Create Event
+              <Button 
+                type="button"
+                onClick={handleNext}
+                className="flex-1 bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
+                disabled={
+                  !formData.email || 
+                  isCheckingUser
+                }
+              >
+                {isCheckingUser ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Checking...
+                  </div>
+                ) : userExists !== null && 
+                   ((userExists === true && formData.password) || 
+                    (userExists === false && formData.firstName && formData.password)) 
+                    ? 'Create Event' : 'Next'}
               </Button>
             </div>
           </div>

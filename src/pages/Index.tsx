@@ -1,331 +1,283 @@
-
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import FeatureCard from '@/components/FeatureCard';
-import Button from '@/components/Button';
-import MessageCard from '@/components/MessageCard';
-import { 
-  MessageCircle, 
-  Image, 
-  Video, 
-  Mic, 
-  Share2, 
-  Lock, 
-  Download,
-  Heart,
-  PartyPopper
-} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/ui/avatar';
+import { getCurrentUser } from '@/lib/mockData';
+import { messagesApi } from '@/lib/mock-db/api';
+import type { Message } from '@/lib/mock-db/types';
+import EventPreview from '@/components/EventPreview';
+
+// Colorful, event-themed images with minimalistic backgrounds
+const eventImages = [
+  // Birthday theme
+  "https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Colorful balloons
+  "https://images.unsplash.com/photo-1514845505178-849cebf1a91d?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Birthday cake
+  "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Party hat
+  
+  // Wedding theme
+  "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Wedding couple
+  "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Wedding rings
+  
+  // Graduation theme
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Graduation cap
+  "https://images.unsplash.com/photo-1627556592933-ffe99c1cd9eb?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Graduation celebration
+  
+  // Tech event theme
+  "https://images.unsplash.com/photo-1573164713712-03790a178651?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Colorful code
+  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Tech gadgets
+  
+  // Travel theme
+  "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Travel scene
+  "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Mountain landscape
+  
+  // Music event
+  "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Music concert
+  "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&auto=format&fit=crop&q=80&ixlib=rb-4.0.3", // Vinyl records
+];
+
+// Shape variations for the avatar display
+const avatarShapes = [
+  "rounded-t-[32px]", // rounded top, flat bottom
+  "rounded-t-full", // fully rounded top, flat bottom
+  "rounded-t-xl", // medium rounded top, flat bottom
+  "rounded-t-lg", // slightly rounded top, flat bottom
+  "rounded-t-[24px]", // rounded top, flat bottom
+  "rounded-t-md", // small rounded top, flat bottom
+];
+
+// Avatar animation component
+const AvatarScroller = () => {
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!scrollerRef.current) return;
+    
+    // For infinite scroll, we need to detect when scroll is near the end
+    const handleScroll = () => {
+      if (scrollerRef.current) {
+        scrollerRef.current.scrollLeft += 0.5; // Slightly faster for smoother scroll
+        
+        // Reset scroll position when halfway through duplicate content for seamless loop
+        if (scrollerRef.current.scrollLeft >= scrollerRef.current.scrollWidth / 2) {
+          // Use a small timeout to avoid visible jump
+          scrollerRef.current.scrollLeft = 1;
+        }
+      }
+    };
+    
+    const animationId = setInterval(handleScroll, 16); // ~60fps
+    
+    return () => clearInterval(animationId);
+  }, []);
+  
+  // Calculate the number of images needed based on viewport width
+  // Wider images with minimal spacing between them
+  return (
+    <div className="fixed bottom-0 left-0 right-0 w-full overflow-hidden h-[250px] bg-gradient-to-t from-white/95 via-white/90 to-transparent z-10">
+      <div ref={scrollerRef} className="flex overflow-x-hidden py-0 w-full absolute bottom-0 left-0 scrollbar-hide">
+        <div className="flex space-x-3 whitespace-nowrap px-2">
+          {/* First set of images */}
+          {eventImages.map((imageUrl, index) => (
+            <div 
+              key={`event-${index}`} 
+              className={`avatar-container inline-block ${
+                avatarShapes[index % avatarShapes.length]
+              } shadow-md overflow-hidden`}
+              style={{
+                width: `280px`,
+                height: `220px`,
+                transform: `translateY(${(index % 2) * 8}px)`
+              }}
+            >
+              <img 
+                src={imageUrl} 
+                alt={`Event theme ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                style={{
+                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  transition: "filter 0.3s ease"
+                }}
+              />
+            </div>
+          ))}
+          
+          {/* Duplicate set for seamless looping */}
+          {eventImages.map((imageUrl, index) => (
+            <div 
+              key={`event-dup-${index}`} 
+              className={`avatar-container inline-block ${
+                avatarShapes[index % avatarShapes.length]
+              } shadow-md overflow-hidden`}
+              style={{
+                width: `280px`,
+                height: `220px`,
+                transform: `translateY(${(index % 2) * 8}px)`
+              }}
+            >
+              <img 
+                src={imageUrl} 
+                alt={`Event theme ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                style={{
+                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  transition: "filter 0.3s ease"
+                }}
+              />
+            </div>
+          ))}
+          
+          {/* Third set to ensure no gaps in transition */}
+          {eventImages.slice(0, 5).map((imageUrl, index) => (
+            <div 
+              key={`event-dup2-${index}`} 
+              className={`avatar-container inline-block ${
+                avatarShapes[index % avatarShapes.length]
+              } shadow-md overflow-hidden`}
+              style={{
+                width: `280px`,
+                height: `220px`,
+                transform: `translateY(${(index % 2) * 8}px)`
+              }}
+            >
+              <img 
+                src={imageUrl} 
+                alt={`Event theme ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                style={{
+                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  transition: "filter 0.3s ease"
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Index = () => {
+  const [randomMessages, setRandomMessages] = useState<Message[]>([]);
+  const currentUser = getCurrentUser();
+
+  useEffect(() => {
+    // Load messages for potential future use
+    const loadMessages = async () => {
+      try {
+        // Get messages from the birthday event
+        const birthdayMessages = await messagesApi.list('e1');
+        // Get messages from the tech event
+        const techMessages = await messagesApi.list('e4');
+        
+        // Combine and shuffle messages
+        const allMessages = [...birthdayMessages, ...techMessages];
+        const shuffled = allMessages.sort(() => 0.5 - Math.random());
+        
+        setRandomMessages(shuffled);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    
+    loadMessages();
+  }, []);
+
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen overflow-x-hidden flex flex-col bg-gradient-to-b from-[#FFFFFF] to-[#F8F9FA] text-gray-900 font-quicklnk relative">
+      {/* Soft radial gradients for visual interest */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-15%] w-[65vw] h-[65vw] rounded-full radial-gradient from-pink-300/50 to-transparent"></div>
+        <div className="absolute top-[20%] right-[-20%] w-[60vw] h-[60vw] rounded-full radial-gradient from-blue-300/40 to-transparent"></div>
+        <div className="absolute bottom-[10%] left-[10%] w-[50vw] h-[50vw] rounded-full radial-gradient from-purple-300/40 to-transparent"></div>
+        <div className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] rounded-full radial-gradient from-yellow-300/30 to-transparent"></div>
+      </div>
+      
+      {/* Header */}
+      <header className="py-4 px-4 z-20 relative">
+        <div className="container max-w-6xl mx-auto flex justify-between items-center">
+          <Link to="/" className="inline-flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
+              W
+            </div>
+            <span className="text-xl font-bold">Wisha</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            {currentUser ? (
+              <div className="flex items-center gap-4">
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">Dashboard</Button>
+                </Link>
+                <UserAvatar user={currentUser} />
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">Log in</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="airbnb" className="rounded-full">Sign up</Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
       
       {/* Hero Section */}
-      <Hero />
-      
-      {/* Features Section */}
-      <section className="py-20 bg-slate-50">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-emerald-100 px-4 py-1 rounded-full mb-4">
-              <span className="text-sm font-medium">Why choose Wisha</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
-              Collect memories in multiple formats
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Let your friends and family share their heartfelt wishes in the way that feels most personal to them.
+      <div className="flex-1 flex flex-col justify-center relative pb-[260px]">
+        {/* Centered Hero Text */}
+        <div className="container max-w-6xl mx-auto px-4 text-center z-10 relative">
+          <div className="mx-auto max-w-3xl">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-quicklnk-heading leading-[1.1] mb-6">
+              Share Moments <br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF385C] to-pink-500">Beyond Time</span>
+            </h1>
+            
+            <p className="text-gray-600 text-xl md:text-2xl font-light mt-6 mx-auto max-w-2xl">
+              Create a beautiful space for friends and family to share messages, memories, and media for your special occasions.
             </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <FeatureCard 
-              icon={<MessageCircle className="h-6 w-6 text-indigo-600" />}
-              title="Text Messages"
-              description="Simple written messages and wishes from your guests."
-              delay={0.1}
-            />
-            <FeatureCard 
-              icon={<Image className="h-6 w-6 text-indigo-600" />}
-              title="Photo Uploads"
-              description="Share beautiful memories through photos and images."
-              delay={0.2}
-            />
-            <FeatureCard 
-              icon={<Video className="h-6 w-6 text-indigo-600" />}
-              title="Video Messages"
-              description="Capture personal video messages from anywhere in the world."
-              delay={0.3}
-            />
-            <FeatureCard 
-              icon={<Mic className="h-6 w-6 text-indigo-600" />}
-              title="Audio Recordings"
-              description="Voice messages to hear the emotion in every wish."
-              delay={0.4}
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* How It Works Section */}
-      <section className="py-20">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full mb-4">
-              <span className="text-sm font-medium">Simple process</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
-              How Wisha works
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Collecting beautiful memories from your friends and family has never been easier.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-serif">1</span>
-              </div>
-              <h3 className="text-xl font-serif font-medium mb-2">Create your event</h3>
-              <p className="text-muted-foreground mb-4">
-                Set up your event in less than a minute. Customize it with your event details.
-              </p>
-            </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-serif">2</span>
-              </div>
-              <h3 className="text-xl font-serif font-medium mb-2">Share your unique link</h3>
-              <p className="text-muted-foreground mb-4">
-                Send your personalized link to friends and family through text, email, or include it in your invitation.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-serif">3</span>
-              </div>
-              <h3 className="text-xl font-serif font-medium mb-2">Collect memories</h3>
-              <p className="text-muted-foreground mb-4">
-                Watch as beautiful messages flow in. Download them all together as a keepsake.
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex justify-center mt-12">
-            <Link to="/create-event">
-              <Button>Create Your Event</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-      
-      {/* Preview Section */}
-      <section className="py-20 bg-emerald-50">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <div className="inline-block bg-emerald-200 px-4 py-1 rounded-full mb-4">
-              <span className="text-sm font-medium">Preview</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
-              See how it looks
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Beautiful design that showcases each memory in the best possible way.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <MessageCard 
-              name="Emma Johnson"
-              message="Happy birthday! Wishing you all the joy and happiness today and always. So glad to be celebrating you!"
-              date="2 days ago"
-            />
-            
-            <MessageCard 
-              name="David Chen"
-              message="Congratulations on your graduation! All your hard work has finally paid off. We're all so proud of you!"
-              date="1 day ago"
-              mediaType="image"
-              mediaUrl="/placeholder.svg"
-            />
-            
-            <MessageCard 
-              name="Sophia Williams"
-              message="Best wishes on your retirement! Looking forward to hearing about all your new adventures."
-              date="5 hours ago"
-              mediaType="audio"
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Benefits Section */}
-      <section className="py-20">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row items-center">
-            <div className="w-full lg:w-1/2 mb-12 lg:mb-0">
-              <div className="max-w-lg">
-                <div className="inline-block bg-indigo-100 px-4 py-1 rounded-full mb-4">
-                  <span className="text-sm font-medium">Why you'll love it</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-serif font-light mb-6">
-                  More than just messages
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8">
-                  Wisha provides a comprehensive solution for collecting and preserving heartfelt wishes from your friends and family.
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
-                      <Share2 className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Easy Sharing</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Share your unique link via WhatsApp, email, social media, or even a QR code.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
-                      <Lock className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Privacy & Moderation</h3>
-                      <p className="text-muted-foreground text-sm">
-                        You control who can view the messages and can moderate content.
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <div className="bg-indigo-100 p-2 rounded-lg mr-4">
-                      <Download className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1">Download & Keep</h3>
-                      <p className="text-muted-foreground text-sm">
-                        Download all your messages as a PDF or digital album to cherish forever.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-md">
-                <div className="absolute -top-6 -left-6 w-full h-full bg-emerald-100 rounded-3xl transform rotate-6"></div>
-                <div className="absolute -bottom-6 -right-6 w-full h-full bg-indigo-200 rounded-3xl transform -rotate-3"></div>
-                
-                <div className="relative bg-white p-8 rounded-3xl shadow-lg">
-                  <img 
-                    src="/placeholder.svg" 
-                    alt="Birthday celebration" 
-                    className="w-full h-64 object-cover rounded-xl mb-6"
-                  />
-                  
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <h3 className="font-serif font-medium text-lg">Alex's Birthday</h3>
-                      <p className="text-sm text-muted-foreground">May 15, 2025</p>
-                    </div>
-                    <div className="bg-indigo-100 h-10 w-10 rounded-full flex items-center justify-center">
-                      <PartyPopper className="h-5 w-5 text-indigo-500" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                      <p className="text-sm">56 messages received</p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                      <p className="text-sm">12 photos shared</p>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full mr-2"></div>
-                      <p className="text-sm">8 video messages</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="py-20 bg-indigo-100">
-        <div className="container max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-light mb-6 max-w-2xl mx-auto">
-            Ready to collect beautiful memories for your special occasion?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Create your own Wisha event in minutes and start collecting heartfelt messages from your loved ones.
-          </p>
-          <Link to="/create-event">
-            <Button size="lg">
-              Create Your Event
-            </Button>
-          </Link>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="bg-white py-12">
-        <div className="container max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <h2 className="text-2xl font-serif font-semibold">Wisha</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                Collect and cherish memories for any occasion
-              </p>
-            </div>
-            
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-              <Link to="/" className="text-sm hover:text-indigo-500 transition-colors">
-                Home
+            <div className="flex flex-wrap gap-4 mt-10 justify-center">
+              <Link to="/create-event">
+                <Button 
+                  variant="airbnb" 
+                  size="lg" 
+                  className="rounded-full px-8 text-base py-6 shadow-lg hover:shadow-xl"
+                >
+                  Create Event — It's Free
+                </Button>
               </Link>
-              <Link to="/how-it-works" className="text-sm hover:text-indigo-500 transition-colors">
-                How It Works
-              </Link>
-              <Link to="/pricing" className="text-sm hover:text-indigo-500 transition-colors">
-                Pricing
-              </Link>
-              <Link to="/create-event" className="text-sm hover:text-indigo-500 transition-colors">
-                Create Event
-              </Link>
+              <EventPreview 
+                buttonVariant="outline"
+                buttonSize="lg"
+                className="px-8 text-base py-6"
+              />
             </div>
-          </div>
-          
-          <div className="border-t border-gray-100 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-xs text-muted-foreground mb-4 md:mb-0">
-              © {new Date().getFullYear()} Wisha. All rights reserved.
-            </p>
-            <div className="flex space-x-6">
-              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
-                Terms of Service
-              </a>
-              <a href="#" className="text-xs text-muted-foreground hover:text-indigo-500 transition-colors">
-                Contact
-              </a>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 mt-16 text-center max-w-xl mx-auto">
+              <div>
+                <div className="text-3xl font-bold text-[#FF385C]">300+</div>
+                <div className="text-gray-600 text-sm mt-1">Events Created</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#FF385C]">5K+</div>
+                <div className="text-gray-600 text-sm mt-1">Messages Shared</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#FF385C]">50K+</div>
+                <div className="text-gray-600 text-sm mt-1">Happy Users</div>
+              </div>
             </div>
           </div>
         </div>
-      </footer>
+        
+        {/* Avatar Scroller with predefined event images */}
+        <AvatarScroller />
+      </div>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback, UserAvatar } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MobileDialog, MobileDialogContent, MobileDialogTrigger, MobileDialogClose } from '@/components/MobileDialog';
@@ -19,6 +19,14 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { eventsApi, messagesApi } from '@/lib/mock-db/api';
 import type { Message, Event, User } from '@/lib/mock-db/types';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 const GIPHY_API_KEY = 'hpvZycW22qCjn5cRM1xtWB8NKq4dQ2My'; // Replace with your actual Giphy API key when deploying
 
@@ -460,12 +468,11 @@ const EventPage = () => {
             </h1>
           </div>
           {currentUser ? (
-            <div>
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                <AvatarFallback>{currentUser.name?.substring(0, 2)}</AvatarFallback>
-              </Avatar>
-            </div>
+            <UserAvatar user={{
+              name: currentUser.name || '',
+              email: currentUser.email || '',
+              avatarUrl: currentUser.avatar
+            }} />
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/login">

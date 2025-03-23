@@ -13,9 +13,10 @@ import { Loader2 } from 'lucide-react';
 
 interface EventFormProps {
   onSubmit: (eventData: any) => void;
+  userLoggedIn?: boolean;
 }
 
-const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
+const EventForm: React.FC<EventFormProps> = ({ onSubmit, userLoggedIn = false }) => {
   const { user, checkUserExists, login, signup } = useAuth();
   
   const [step, setStep] = useState(1);
@@ -63,7 +64,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
       }
       
       // If user is already logged in, submit directly
-      if (user) {
+      if (user || userLoggedIn) {
         onSubmit(formData);
         return;
       }
@@ -144,235 +145,187 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
   
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Step indicator - horizontal lines */}
-      <div className="mb-8 flex">
-        <div 
-          className={`h-1 w-[200px] rounded-full transition-colors duration-300 ${step === 1 ? 'bg-[#FF385C]' : 'bg-gray-200'}`}
-        ></div>
-        <div className="mx-2"></div>
-        <div 
-          className={`h-1 w-[200px] rounded-full transition-colors duration-300 ${step === 2 ? 'bg-[#FF385C]' : 'bg-gray-200'}`}
-        ></div>
-      </div>
+      {/* Step indicator - Only show for non-logged in users */}
+      {!userLoggedIn && (
+        <div className="mb-8 flex">
+          <div 
+            className={`h-1 w-[200px] rounded-full transition-colors duration-300 ${step === 1 ? 'bg-[#FF385C]' : 'bg-gray-200'}`}
+          ></div>
+        </div>
+      )}
       
-      <form className="space-y-6 animate-fade-in">
-        {step === 1 && (
-          <div className="space-y-5 animate-fade-in">
-            <div className="mb-8">
-              <div className="inline-block bg-[#FF385C]/10 px-4 py-1.5 rounded-full mb-4">
-                <span className="text-sm font-medium text-[#FF385C]">Start collecting memories</span>
+      {/* Form Title */}
+      <h1 className="text-2xl font-semibold mb-6">
+        {step === 1 ? 'Create Your Event' : 'Set Up Your Account'}
+      </h1>
+      
+      {/* Form Content */}
+      <div className="space-y-6">
+        {step === 1 ? (
+          /* Step 1: Event Details */
+          <>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="eventName" className="block text-sm font-medium mb-1">
+                  Event Name
+                </label>
+                <Input
+                  id="eventName"
+                  name="eventName"
+                  placeholder="E.g., John's Birthday, Sarah's Graduation"
+                  value={formData.eventName}
+                  onChange={handleChange}
+                  required
+                />
               </div>
-              <h1 className="text-3xl font-medium mb-4">
-                Tell us about your event
-              </h1>
-              <p className="text-gray-500">
-                Set up your event to start collecting beautiful messages from your friends and family.
-              </p>
-            </div>
-            
-            <div>
-              <label htmlFor="eventName" className="block mb-1.5 text-sm font-medium">
-                Event Name
-              </label>
-              <Input
-                id="eventName"
-                name="eventName"
-                type="text"
-                placeholder="e.g., Alex's 30th Birthday"
-                value={formData.eventName}
-                onChange={handleChange}
-                className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
-                required
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="eventType" className="block mb-1.5 text-sm font-medium">
-                Event Type
-              </label>
-              <div className="relative">
+              
+              <div>
+                <label htmlFor="eventType" className="block text-sm font-medium mb-1">
+                  Event Type
+                </label>
                 <Select
                   value={formData.eventType}
                   onValueChange={handleEventTypeChange}
                 >
-                  <SelectTrigger className="w-full rounded-xl border-gray-200">
-                    <SelectValue placeholder="Select event type..." />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {eventTypes.map(type => (
+                    {eventTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
-                        <span className="flex items-center">
-                          <span className="mr-2 text-lg">{type.icon}</span>
-                          {type.label}
-                        </span>
+                        <div className="flex items-center">
+                          <span className="mr-2">{type.icon}</span>
+                          <span>{type.label}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            
-            <div className="pt-6">
-              <Button 
-                type="button" 
-                onClick={handleNext} 
-                className="w-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
-              >
-                Continue
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {step === 2 && (
-          <div className="space-y-5 animate-fade-in">
-            <div className="mb-8">
-              <div className="inline-block bg-[#FF385C]/10 px-4 py-1.5 rounded-full mb-4">
-                <span className="text-sm font-medium text-[#FF385C]">Almost there</span>
-              </div>
-              <h1 className="text-3xl font-medium mb-4">
-                Enter your email
-              </h1>
-              <p className="text-gray-500">
-                This will allow you to save, invite, and share your event.
-              </p>
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block mb-1.5 text-sm font-medium">
-                Email
-              </label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
-                required
-              />
-              {formData.email && (
-                <div className="mt-2 flex items-center">
-                  {isCheckingUser ? (
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Checking account...
-                    </div>
-                  ) : userExists === true ? (
-                    <p className="text-green-600 text-sm">Looks like you're already registered with Wisha. Enter your password.</p>
-                  ) : userExists === false ? (
-                    <p className="text-blue-600 text-sm">Looks like you're new to Wisha. What name should we call you?</p>
-                  ) : null}
-                </div>
-              )}
-            </div>
-            
-            {userExists === true && (
+          </>
+        ) : (
+          /* Step 2: Account Info */
+          <>
+            <div className="space-y-4">
               <div>
-                <label htmlFor="password" className="block mb-1.5 text-sm font-medium">
-                  Password
+                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                  Email Address
                 </label>
                 <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={formData.email}
                   onChange={handleChange}
-                  className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
+                  disabled={isCheckingUser}
                   required
                 />
               </div>
-            )}
-            
-            {userExists === false && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="block mb-1.5 text-sm font-medium">
-                      First Name
-                    </label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      placeholder="First name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block mb-1.5 text-sm font-medium">
-                      Last Name
-                    </label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      placeholder="Last name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
-                    />
-                  </div>
+              
+              {isCheckingUser && (
+                <div className="flex items-center justify-center py-2">
+                  <Loader2 className="h-5 w-5 animate-spin text-[#FF385C]" />
+                  <span className="ml-2 text-sm text-gray-500">Checking email...</span>
                 </div>
-                
+              )}
+              
+              {!isCheckingUser && userExists === false && !isEditingEmail && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium mb-1">
+                        First Name
+                      </label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        placeholder="Jane"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="block text-sm font-medium mb-1">
+                        Last Name
+                      </label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        placeholder="Doe"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              {!isCheckingUser && userExists !== null && !isEditingEmail && (
                 <div>
-                  <label htmlFor="password" className="block mb-1.5 text-sm font-medium">
-                    Set a password
+                  <label htmlFor="password" className="block text-sm font-medium mb-1">
+                    Password
                   </label>
                   <Input
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="Choose a secure password"
+                    placeholder={userExists ? "Enter your password" : "Create a password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full rounded-xl border-gray-200 focus-visible:ring-primary"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1.5">
-                    Must be at least 8 characters
-                  </p>
                 </div>
-              </>
-            )}
-            
-            <div className="pt-6 flex space-x-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleBack}
-                className="rounded-xl border-gray-200 hover:bg-gray-50"
-              >
-                Back
-              </Button>
-              <Button 
-                type="button"
-                onClick={handleNext}
-                className="flex-1 bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
-                disabled={
-                  !formData.email || 
-                  isCheckingUser
-                }
-              >
-                {isCheckingUser ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Checking...
-                  </div>
-                ) : userExists !== null && 
-                   ((userExists === true && formData.password) || 
-                    (userExists === false && formData.firstName && formData.password)) 
-                    ? 'Create Event' : 'Next'}
-              </Button>
+              )}
             </div>
-          </div>
+          </>
         )}
-      </form>
+      </div>
+      
+      {/* Form Actions */}
+      <div className="flex justify-between mt-8">
+        {step > 1 && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+        )}
+        
+        <Button
+          type="button"
+          className={`${step > 1 ? 'ml-auto' : 'w-full'} bg-[#FF385C] hover:bg-[#FF385C]/90`}
+          onClick={handleNext}
+          disabled={
+            isCheckingUser ||
+            (step === 1 && (!formData.eventName || !formData.eventType)) ||
+            (step === 2 && (
+              !formData.email ||
+              (userExists === false && !formData.firstName) ||
+              (userExists !== null && !isEditingEmail && !formData.password)
+            ))
+          }
+        >
+          {isCheckingUser ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Checking
+            </>
+          ) : step === 1 ? (
+            userLoggedIn ? "Create Event" : "Next"
+          ) : (
+            userExists === null || isEditingEmail ? (
+              "Next"
+            ) : (
+              "Create Event"
+            )
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

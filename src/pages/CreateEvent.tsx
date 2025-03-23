@@ -36,21 +36,6 @@ const CreateEvent = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="inline-flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
-              W
-            </div>
-            <span className="text-xl font-bold">Wisha</span>
-          </Link>
-          <div>
-            {currentUser && <UserAvatar user={currentUser} />}
-          </div>
-        </div>
-      </header>
-      
       <div className="flex flex-1">
         {/* Left Column - Illustration with brand background */}
         <div className="hidden lg:block w-1/2 bg-[#FF385C] relative overflow-hidden">
@@ -121,9 +106,22 @@ const CreateEvent = () => {
         <div className="hidden lg:block w-px bg-gray-200 h-full"></div>
         
         {/* Right Column - Form */}
-        <div className="w-full lg:w-1/2 px-4 py-12 flex items-start justify-center">
-          <div className="w-full max-w-lg pt-12">
-            <EventForm onSubmit={handleCreateEvent} />
+        <div className="w-full lg:w-1/2 px-4 py-6 flex flex-col items-start">
+          {/* Logo */}
+          <div className="w-full flex justify-between items-center mb-8 px-4">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
+                W
+              </div>
+              <span className="text-xl font-bold">Wisha</span>
+            </Link>
+            {currentUser && <UserAvatar user={currentUser} />}
+          </div>
+          
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-lg">
+              <EventForm onSubmit={handleCreateEvent} userLoggedIn={!!currentUser} />
+            </div>
           </div>
         </div>
       </div>

@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { 
   PlusCircle, 
   Calendar, 
   User, 
   Gift, 
-  ChevronRight
+  ChevronRight,
+  MessageSquare,
+  Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
@@ -150,15 +152,15 @@ const Dashboard = () => {
                   </div>
                   <CardContent className="p-5">
                     <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
-                    <p className="text-gray-500 text-sm mb-3">{format(event.date, 'MMMM dd, yyyy')}</p>
+                    <p className="text-gray-500 text-sm mb-3">Created {format(event.date, 'MMMM dd, yyyy')}</p>
                     <div className="flex justify-between text-sm text-gray-600">
                       <div className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {event.participantCount} people
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        {event.participantCount} messages
                       </div>
                       <div className="flex items-center">
-                        <Gift className="h-4 w-4 mr-1" />
-                        {event.itemCount} items
+                        <Clock className="h-4 w-4 mr-1" />
+                        {formatDistanceToNow(new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000))} ago
                       </div>
                     </div>
                   </CardContent>

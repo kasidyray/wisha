@@ -191,7 +191,7 @@ const Index = () => {
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[50vw] h-[50vw] rounded-full opacity-40 blur-3xl bg-gradient-to-br from-[#FFE1E7] to-[#FFC7D5]"></div>
         <div className="absolute bottom-[20%] left-[-10%] w-[40vw] h-[40vw] rounded-full opacity-30 blur-3xl bg-gradient-to-tr from-[#E1EBFF] to-[#C7D5FF]"></div>
-      </div>
+              </div>
       
       {/* Header */}
       <header className="py-4 px-4 z-20 relative">
@@ -217,7 +217,7 @@ const Index = () => {
                 </Link>
                 <Link to="/signup">
                   <Button variant="airbnb" className="rounded-full">Sign up</Button>
-                </Link>
+            </Link>
               </>
             )}
           </div>
@@ -257,15 +257,15 @@ const Index = () => {
             
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mt-16 text-center max-w-xl mx-auto">
-              <div>
+                    <div>
                 <div className="text-3xl font-bold text-[#FF385C]">300+</div>
                 <div className="text-gray-600 text-sm mt-1">Events Created</div>
-              </div>
-              <div>
+                    </div>
+                    <div>
                 <div className="text-3xl font-bold text-[#FF385C]">5K+</div>
                 <div className="text-gray-600 text-sm mt-1">Messages Shared</div>
               </div>
-              <div>
+                    <div>
                 <div className="text-3xl font-bold text-[#FF385C]">50K+</div>
                 <div className="text-gray-600 text-sm mt-1">Happy Users</div>
               </div>
@@ -275,7 +275,7 @@ const Index = () => {
         
         {/* Avatar Scroller with predefined event images */}
         <AvatarScroller />
-      </div>
+        </div>
     </div>
   );
 };

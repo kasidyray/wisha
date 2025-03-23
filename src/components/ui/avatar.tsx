@@ -12,7 +12,8 @@ import {
   Bell, 
   Gift, 
   ChevronDown,
-  LayoutDashboard
+  LayoutDashboard,
+  PlusCircle
 } from "lucide-react"
 
 const Avatar = React.forwardRef<
@@ -120,6 +121,12 @@ interface UserAvatarProps {
 const UserAvatar = ({ user, className }: UserAvatarProps) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Ensure name starts with capital letter
+  const formattedName = user.name
+    .split(' ')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 
   return (
     <DropdownMenu>
@@ -127,10 +134,10 @@ const UserAvatar = ({ user, className }: UserAvatarProps) => {
         <div className="flex items-center gap-2 rounded-full border bg-white px-2 py-1 hover:shadow-sm transition-all duration-200">
           <Avatar className={className}>
             {user.avatarUrl ? (
-              <AvatarImage src={user.avatarUrl} alt={user.name} />
+              <AvatarImage src={user.avatarUrl} alt={formattedName} />
             ) : (
               <AvatarFallback className="bg-[#FF385C]/10 text-[#FF385C] font-medium">
-                {user.name.charAt(0).toUpperCase()}
+                {formattedName.charAt(0)}
               </AvatarFallback>
             )}
           </Avatar>
@@ -139,7 +146,7 @@ const UserAvatar = ({ user, className }: UserAvatarProps) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 rounded-xl p-2" align="end">
         <div className="px-2 py-1.5 mb-1">
-          <p className="font-medium text-sm">{user.name}</p>
+          <p className="font-medium text-sm">{formattedName}</p>
           <p className="text-xs text-muted-foreground">{user.email}</p>
         </div>
         <DropdownMenuSeparator />
@@ -150,17 +157,12 @@ const UserAvatar = ({ user, className }: UserAvatarProps) => {
           <LayoutDashboard className="h-4 w-4 text-gray-500" />
           <span>Dashboard</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2">
-          <Bell className="h-4 w-4 text-gray-500" />
-          <span>Notifications</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2">
-          <Gift className="h-4 w-4 text-gray-500" />
-          <span>My Wishlists</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2">
-          <Settings className="h-4 w-4 text-gray-500" />
-          <span>Settings</span>
+        <DropdownMenuItem 
+          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2"
+          onClick={() => navigate('/create-event')}
+        >
+          <PlusCircle className="h-4 w-4 text-gray-500" />
+          <span>Create Event</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 

@@ -603,7 +603,7 @@ const EventPage = () => {
             
       {/* Custom Mobile-Friendly Modal Implementation */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex md:items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* Modal Backdrop */}
           <div 
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -614,11 +614,10 @@ const EventPage = () => {
           <div 
             ref={modalRef}
             className="relative w-full md:w-[500px] bg-white md:rounded-xl shadow-xl
-                      flex flex-col h-[100vh] md:h-[40vh] min-h-[60vh] md:min-h-[40vh] md:max-h-[80vh] overflow-hidden z-10"
+                      flex flex-col h-auto md:h-auto min-h-[auto] md:min-h-[auto] md:max-h-[80vh] overflow-hidden z-10"
             style={{
               // On mobile, adjust position based on keyboard height and viewport
-              height: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh',
-              maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : undefined
+              maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh'
             }}
           >
             {/* Modal Header */}
@@ -632,15 +631,15 @@ const EventPage = () => {
                 <X className="h-4 w-4" />
               </Button>
               <div className="flex-1 text-center">
-                <span className="text-sm font-semibold">New message</span>
+                <span className="text-sm font-semibold">Share your message</span>
               </div>
               <div className="w-8 h-8"></div> {/* Empty div for flex spacing */}
-              </div>
+            </div>
               
             {/* Modal Body with Flexible Height */}
-            <div className="flex-grow overflow-auto">
+            <div className="flex-1 overflow-hidden flex flex-col">
               {isGifSearchOpen ? (
-                <div className="h-full flex flex-col">
+                <div className="flex flex-col">
                   <div className="sticky top-0 z-10 bg-white p-4 border-b">
                     <div className="flex gap-2">
                       <Input
@@ -658,7 +657,7 @@ const EventPage = () => {
                     </div>
                   </div>
                   
-                  <div className="p-4 flex-1 overflow-auto">
+                  <div className="p-4 overflow-y-auto max-h-[300px]">
                     <div className="grid grid-cols-2 gap-2">
                       {gifResults.map((gif) => (
                         <div 
@@ -693,81 +692,83 @@ const EventPage = () => {
               </div>
           </div>
         ) : (
-                <form onSubmit={handleSubmit} className="space-y-0 p-0 h-full flex flex-col">
-                  <div className="flex p-4 pb-0 flex-grow overflow-auto">
-                    <div className="mr-3 flex-shrink-0">
-                      <div className="h-10 w-10 bg-[#FF385C] rounded-full flex items-center justify-center text-white font-semibold">
-                        {currentUser?.name?.charAt(0) || newMessage.name.charAt(0) || '?'}
+                <form onSubmit={handleSubmit} className="flex flex-col">
+                  <div className="overflow-y-auto">
+                    <div className="flex p-4 pb-2">
+                      <div className="mr-3 flex-shrink-0">
+                        <div className="h-10 w-10 bg-[#FF385C] rounded-full flex items-center justify-center text-white font-semibold">
+                          {currentUser?.name?.charAt(0) || newMessage.name.charAt(0) || '?'}
+                        </div>
                       </div>
-            </div>
-            
-                    <div className="flex-1 min-h-0">
-                      {!currentUser && (
-                        <Input
-                          id="name"
-                          value={newMessage.name}
-                          onChange={(e) => setNewMessage({...newMessage, name: e.target.value})}
-                          placeholder="Your name"
-                          className="border-0 p-0 text-base focus-visible:ring-0 placeholder:text-gray-500 mb-2"
+              
+                      <div className="flex-1">
+                        {!currentUser && (
+                          <Input
+                            id="name"
+                            value={newMessage.name}
+                            onChange={(e) => setNewMessage({...newMessage, name: e.target.value})}
+                            placeholder="Your name"
+                            className="border-0 p-0 text-base focus-visible:ring-0 placeholder:text-gray-500 mb-2"
+                            required
+                          />
+                        )}
+                        
+                        <Textarea
+                          id="message"
+                          ref={textareaRef}
+                          value={newMessage.message}
+                          onChange={(e) => {
+                            setNewMessage({...newMessage, message: e.target.value});
+                          }}
+                          placeholder="What's your message?"
+                          className="border-0 p-0 resize-none text-lg focus-visible:ring-0 placeholder:text-gray-500 min-h-[80px] overflow-hidden mb-2"
                           required
                         />
-                      )}
-                      
-                      <Textarea
-                        id="message"
-                        ref={textareaRef}
-                        value={newMessage.message}
-                        onChange={(e) => {
-                          setNewMessage({...newMessage, message: e.target.value});
-                        }}
-                        placeholder="What's your message?"
-                        className="border-0 p-0 resize-none text-lg focus-visible:ring-0 placeholder:text-gray-500 min-h-[80px] overflow-hidden"
-                        required
-                      />
+                      </div>
                     </div>
+                    
+                    {(newMessage.mediaFile && newMessage.mediaType) || newMessage.gifUrl ? (
+                      <div className="mx-4 mb-6 relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                        {newMessage.mediaType === 'gif' && newMessage.gifUrl ? (
+                          <img 
+                            src={newMessage.gifUrl} 
+                            alt="Selected GIF" 
+                            className="w-full h-auto max-h-64 object-cover" 
+                          />
+                        ) : newMessage.mediaType === 'image' || newMessage.mediaType === 'gif' ? (
+                          <img 
+                            src={URL.createObjectURL(newMessage.mediaFile!)} 
+                            alt="Preview" 
+                            className="w-full h-auto max-h-64 object-cover" 
+                          />
+                        ) : newMessage.mediaType === 'video' ? (
+                          <video 
+                            src={URL.createObjectURL(newMessage.mediaFile!)} 
+                            controls 
+                            className="w-full h-auto max-h-64" 
+                          />
+                        ) : (
+                          <audio 
+                            src={URL.createObjectURL(newMessage.mediaFile!)} 
+                            controls 
+                            className="w-full p-4" 
+                          />
+                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-2 right-2 rounded-full bg-black/50 hover:bg-black/60 text-white h-8 w-8 p-0"
+                          onClick={() => setNewMessage({...newMessage, mediaFile: null, mediaType: null, gifUrl: ''})}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : null}
                   </div>
                   
-                  {(newMessage.mediaFile && newMessage.mediaType) || newMessage.gifUrl ? (
-                    <div className="mx-4 mt-3 mb-16 relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-                      {newMessage.mediaType === 'gif' && newMessage.gifUrl ? (
-                        <img 
-                          src={newMessage.gifUrl} 
-                          alt="Selected GIF" 
-                          className="w-full h-auto max-h-64 object-cover" 
-                        />
-                      ) : newMessage.mediaType === 'image' || newMessage.mediaType === 'gif' ? (
-                        <img 
-                          src={URL.createObjectURL(newMessage.mediaFile!)} 
-                          alt="Preview" 
-                          className="w-full h-auto max-h-64 object-cover" 
-                        />
-                      ) : newMessage.mediaType === 'video' ? (
-                        <video 
-                          src={URL.createObjectURL(newMessage.mediaFile!)} 
-                          controls 
-                          className="w-full h-auto max-h-64" 
-                        />
-                      ) : (
-                        <audio 
-                          src={URL.createObjectURL(newMessage.mediaFile!)} 
-                          controls 
-                          className="w-full p-4" 
-                        />
-                      )}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 rounded-full bg-black/50 hover:bg-black/60 text-white h-8 w-8 p-0"
-                        onClick={() => setNewMessage({...newMessage, mediaFile: null, mediaType: null, gifUrl: ''})}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : null}
-                  
-                  {/* Footer that stays visible above keyboard */}
-                  <div className="p-4 pt-3 border-t fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto bg-white z-10">
+                  {/* Footer */}
+                  <div className="p-4 pt-3 border-t bg-white z-10 flex-shrink-0">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <TooltipProvider>
@@ -824,15 +825,15 @@ const EventPage = () => {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-            </div>
-            
+                      </div>
+                      
                       <Button 
                         type="submit" 
                         className="rounded-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white font-semibold px-5"
                         disabled={!newMessage.message.trim()}
                       >
                         Post
-              </Button>
+                      </Button>
                     </div>
                   </div>
                 </form>

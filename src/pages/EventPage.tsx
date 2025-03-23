@@ -49,6 +49,7 @@ const EventPage = () => {
   const modalRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [modalState, setModalState] = useState<'open' | 'closed'>('closed');
   
   // Form state
   const [newMessage, setNewMessage] = useState({
@@ -414,6 +415,33 @@ const EventPage = () => {
     };
   }, [isModalOpen]);
 
+  // Handle modal open/close with animation
+  useEffect(() => {
+    if (isModalOpen) {
+      setModalState('open');
+    } else {
+      // If modal is closing, delay the state change to allow animation to complete
+      const timer = setTimeout(() => {
+        setModalState('closed');
+      }, 200); // Match this to the animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [isModalOpen]);
+
+  // Close modal with animation
+  const closeModalWithAnimation = () => {
+    if (modalRef.current) {
+      // Set state to closing to trigger animation
+      modalRef.current.setAttribute('data-state', 'closed');
+      // Wait for animation to complete before actually closing
+      setTimeout(() => {
+        setIsModalOpen(false);
+      }, 200); // Match this to the animation duration
+    } else {
+      setIsModalOpen(false);
+    }
+  };
+
   if (!event || !host) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -606,20 +634,26 @@ const EventPage = () => {
         <div className="fixed inset-0 z-50 flex md:items-center justify-center">
           {/* Modal Backdrop */}
           <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setIsModalOpen(false)}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            onClick={closeModalWithAnimation}
+            data-state={modalState}
           />
           
           {/* Modal Content */}
           <div 
             ref={modalRef}
-            className="relative w-full md:w-[500px] bg-white md:rounded-xl shadow-xl
-                      flex flex-col h-[100vh] md:h-auto md:min-h-[400px] md:max-h-[80vh] overflow-hidden z-10"
+            className={`relative w-full md:w-[500px] bg-white md:rounded-xl shadow-xl
+                      flex flex-col h-[100vh] md:h-auto md:min-h-[400px] md:max-h-[80vh] overflow-hidden z-10
+                      animate-in 
+                      ${modalState === 'open' ? 'fade-in-0 zoom-in-95 slide-in-from-top-2' : 'fade-out-0 zoom-out-95'}
+                      duration-200`}
             style={{
               // On mobile, adjust position based on keyboard height and viewport
               height: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh',
               maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : undefined
             }}
+            data-state={modalState}
+            data-side="bottom"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between p-3 border-b">
@@ -627,7 +661,7 @@ const EventPage = () => {
                 variant="ghost" 
                 size="sm" 
                 className="rounded-full w-8 h-8 p-0 hover:bg-gray-100"
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModalWithAnimation}
               >
                 <X className="h-4 w-4" />
               </Button>

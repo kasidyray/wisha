@@ -1,0 +1,26 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Waving hand -->
+  <path d="M320 220C320 220 320 170 320 150C320 130 300 130 300 150C300 170 300 180 300 180" stroke="#F97316" stroke-width="30" stroke-linecap="round"/>
+  <path d="M340 220C340 220 340 170 340 150C340 130 320 130 320 150C320 170 320 220 320 220" stroke="#FB923C" stroke-width="30" stroke-linecap="round"/>
+  <path d="M360 220C360 220 360 170 360 150C360 130 340 130 340 150C340 170 340 220 340 220" stroke="#FDBA74" stroke-width="30" stroke-linecap="round"/>
+  <path d="M380 210C380 210 380 170 380 150C380 130 360 130 360 150C360 170 360 220 360 220" stroke="#FED7AA" stroke-width="30" stroke-linecap="round"/>
+  
+  <!-- Arm -->
+  <path d="M300 180C300 180 290 200 280 230C270 260 260 300 260 300" stroke="#F97316" stroke-width="30" stroke-linecap="round"/>
+  
+  <!-- Horizon line -->
+  <path d="M100 300H500" stroke="#94A3B8" stroke-width="4" stroke-dasharray="10 10"/>
+  
+  <!-- Sun setting -->
+  <circle cx="160" cy="260" r="40" fill="#FDE68A"/>
+  <path d="M70 320C70 260 110 220 160 220C210 220 250 260 250 320H70Z" fill="#FEF3C7" fill-opacity="0.5"/>
+  
+  <!-- Airplane -->
+  <path d="M450 100L480 110L490 130L450 120L430 140L400 130L450 100Z" fill="#94A3B8"/>
+  <path d="M490 130L500 160L470 150L490 130Z" fill="#94A3B8"/>
+  
+  <!-- Airplane trail -->
+  <path d="M400 130C380 140 360 145 330 150" stroke="#CBD5E1" stroke-width="3" stroke-dasharray="6 6"/>
+</svg> 

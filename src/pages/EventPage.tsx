@@ -11,13 +11,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { MobileDialog, MobileDialogContent, MobileDialogTrigger, MobileDialogClose } from '@/components/MobileDialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import SharePopover from '@/components/SharePopover';
 import FontSettings from '@/components/FontSettings';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { eventsApi, messagesApi } from '@/lib/mock-db/api';
+import { eventsService } from '@/services/events';
+import { messagesService } from '@/services/messages';
+import { usersService } from '@/services/users';
+import { uploadMessageMedia } from '@/lib/data';
 import type { Message, Event, User } from '@/lib/mock-db/types';
 import { MessageSkeletonGrid } from '@/components/MessageSkeleton';
 import { 
@@ -50,6 +52,9 @@ const EventPage = () => {
   const modalRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
   const [newMessage, setNewMessage] = useState({
@@ -57,6 +62,7 @@ const EventPage = () => {
     message: '',
     mediaFile: null as File | null,
     mediaType: null as 'image' | 'video' | 'audio' | 'gif' | null,
+    mediaUrl: null as string | null,
     gifUrl: ''
   });
 
@@ -76,9 +82,6 @@ const EventPage = () => {
   
   const [isTitleVisible, setIsTitleVisible] = useState(true);
   const titleRef = useRef<HTMLDivElement>(null);
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
   
   const [currentFont, setCurrentFont] = useState('font-sans');
   const [currentBgColor, setCurrentBgColor] = useState('bg-[rgb(255,228,233)]');
@@ -172,84 +175,134 @@ const EventPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!event) return;
+    if (!event) {
+      console.log('No event found');
+      return;
+    }
+    
+    if (isSubmitting) {
+      console.log('Already submitting');
+      return;
+    }
+    
+    // Check if we have a message or media content
+    if (!newMessage.message.trim() && !newMessage.mediaFile && !newMessage.gifUrl) {
+      toast.error('Please enter a message or add media');
+      return;
+    }
+    
+    // Ensure guest users enter a name
+    if (!currentUser && !newMessage.name.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+    
+    setIsSubmitting(true);
     
     try {
+      let media: {
+        type: 'image' | 'video' | 'audio' | 'gif';
+        url: string;
+        thumbnailUrl?: string;
+      } | undefined = undefined;
+
+      // Handle GIF media
+      if (newMessage.gifUrl) {
+        media = {
+          type: 'gif',
+          url: newMessage.gifUrl
+        };
+      }
+      // Upload media if exists
+      else if (newMessage.mediaFile && newMessage.mediaType) {
+        const uploadResult = await uploadMessageMedia(newMessage.mediaFile);
+        
+        if (uploadResult) {
+          media = {
+            type: uploadResult.type as 'image' | 'video' | 'audio' | 'gif',
+            url: uploadResult.url
+          };
+        } else {
+          toast.error('Failed to upload media');
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
       // Create new message
-      const message = await messagesApi.create({
+      const message = await messagesService.create({
         eventId: event.id,
         content: newMessage.message,
-        authorId: currentUser?.id || 'guest',
-        media: newMessage.mediaFile 
-          ? {
-              type: newMessage.mediaType as 'image' | 'video' | 'audio' | 'gif',
-              url: URL.createObjectURL(newMessage.mediaFile)
-            } 
-          : newMessage.gifUrl
-            ? {
-                type: 'gif',
-                url: newMessage.gifUrl
-              }
-            : undefined
+        authorId: currentUser?.id,
+        authorName: newMessage.name,
+        media
       });
       
-      // Store the custom name separately
-      setMessageNameMap(prev => ({
-        ...prev,
-        [message.id]: newMessage.name
-      }));
-      
-      // Add to messages
-      setMessages([message, ...messages]);
-      
-      // Reset form and close modal
-      setNewMessage({
-        name: currentUser?.name || '',
-        message: '',
-        mediaFile: null,
-        mediaType: null,
-        gifUrl: ''
-      });
-      
-      setMediaType(null);
-      setIsModalOpen(false);
-      toast.success('Your message has been added!');
+      // Reset form and add message to list
+      if (message) {
+        setMessages((prev) => [message, ...prev]);
+        setNewMessage({
+          name: currentUser?.name || newMessage.name || '',
+          message: '',
+          mediaFile: null,
+          mediaType: null,
+          mediaUrl: null,
+          gifUrl: ''
+        });
+        
+        setMediaType(null);
+        setIsModalOpen(false);
+        toast.success('Your message has been added!');
+      }
     } catch (error) {
-      toast.error('Failed to add message');
-      console.error('Error adding message:', error);
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   useEffect(() => {
     let isMounted = true;
     
-    const loadEventData = async () => {
+    const fetchEventData = async () => {
       if (!id) return;
       
+      setLoadingError('');
       setIsLoading(true);
-      setLoadingError(null);
       
       try {
-        const eventData = await eventsApi.get(id);
+        // Get event
+        const eventData = await eventsService.getById(id);
         
         if (!isMounted) return;
         
-        if (eventData) {
-          setEvent(eventData);
-          setHost(eventData.creator);
-          
-          // Get messages
-          const messagesData = await messagesApi.list(id);
-          if (isMounted) {
-            setMessages(messagesData);
-          }
-        } else {
+        if (!eventData) {
           setLoadingError('Event not found');
+          setIsLoading(false);
+          return;
+        }
+        
+        setEvent(eventData);
+        
+        // Get host
+        if (eventData.creatorId) {
+          const host = await usersService.getById(eventData.creatorId);
+          if (isMounted && host) {
+            setHost(host);
+          }
+        }
+        
+        // Get messages
+        const messagesData = await messagesService.list(id);
+        if (isMounted) {
+          // Sort messages to show newest first
+          setMessages(messagesData.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()));
         }
       } catch (error) {
         console.error('Error loading event:', error);
         if (isMounted) {
-          setLoadingError('Failed to load event. Please try refreshing the page.');
+          setLoadingError('Failed to load event');
         }
       } finally {
         if (isMounted) {
@@ -258,12 +311,12 @@ const EventPage = () => {
       }
     };
     
-    loadEventData();
+    fetchEventData();
     
     return () => {
       isMounted = false;
     };
-  }, [id, currentUser]);
+  }, [id]);
 
   useEffect(() => {
     // Load saved font and background color preferences
@@ -387,16 +440,25 @@ const EventPage = () => {
   useEffect(() => {
     if (!isModalOpen || !addButtonRef.current || !modalRef.current) return;
     
-    // Only apply custom positioning on desktop
+    const modalElement = modalRef.current;
+    
+    // Apply different positioning based on screen size
     if (window.innerWidth >= 768) {
+      // Desktop positioning - above the button
       const buttonRect = addButtonRef.current.getBoundingClientRect();
-      const modalElement = modalRef.current;
-      
-      // Position modal above the button
       modalElement.style.position = 'fixed';
       modalElement.style.bottom = `${window.innerHeight - buttonRect.top + 16}px`;
       modalElement.style.left = '50%';
       modalElement.style.transform = 'translateX(-50%)';
+      modalElement.style.top = 'auto'; // Clear any top positioning
+    } else {
+      // Mobile positioning - at the top of the screen
+      modalElement.style.position = 'fixed';
+      modalElement.style.top = '0';
+      modalElement.style.left = '0';
+      modalElement.style.right = '0';
+      modalElement.style.bottom = 'auto'; // Clear any bottom positioning
+      modalElement.style.transform = 'none'; // Clear any transform
     }
   }, [isModalOpen]);
 
@@ -648,8 +710,10 @@ const EventPage = () => {
             className="relative w-full md:w-[500px] bg-white md:rounded-xl shadow-xl
                       flex flex-col h-auto md:h-auto min-h-[auto] md:min-h-[auto] md:max-h-[80vh] overflow-hidden z-10"
             style={{
-              // On mobile, adjust position based on keyboard height and viewport
-              maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh'
+              // On mobile, adjust position and height based on keyboard height and viewport
+              maxHeight: window.innerWidth < 768 
+                ? (keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh')
+                : '80vh'
             }}
           >
             {/* Modal Header */}

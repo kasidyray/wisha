@@ -3,80 +3,31 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-
-const testUsers = [
-  {
-    name: 'John Doe',
-    email: 'john@example.com',
-    password: 'password123',
-    description: 'Event creator with multiple events'
-  },
-  {
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    password: 'password123',
-    description: 'Baby shower event organizer'
-  },
-  {
-    name: 'Alex Chen',
-    email: 'alex@example.com',
-    password: 'password123',
-    description: 'Tech meetup organizer'
-  }
-];
-
-const guestPreviews = [
-  {
-    name: 'Birthday Event',
-    description: 'Preview John\'s Birthday Celebration',
-    eventId: 'e1'
-  },
-  {
-    name: 'Tech Event',
-    description: 'Preview Tech Meetup & Networking',
-    eventId: 'e4'
-  },
-  {
-    name: 'Wedding Shower',
-    description: 'Preview Sarah\'s Wedding Shower',
-    eventId: 'e3'
-  }
-];
+import { Loader } from '@/components/ui/loader';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
     try {
+      setIsSubmitting(true);
       await login(email, password);
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from);
     } catch (error) {
       console.error('Login failed:', error);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-  
-  const handleTestUserLogin = async (testUser: typeof testUsers[0]) => {
-    try {
-      await login(testUser.email, testUser.password);
-      const from = location.state?.from?.pathname || '/dashboard';
-      navigate(from);
-      toast.success(`Welcome back, ${testUser.name}!`);
-    } catch (error) {
-      console.error('Test user login failed:', error);
-    }
-  };
-
-  const handleGuestPreview = (eventId: string) => {
-    navigate(`/events/${eventId}`);
   };
   
   return (
@@ -108,6 +59,7 @@ const Login = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full"
                 required
+                disabled={isSubmitting}
               />
             </div>
             
@@ -122,11 +74,23 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full"
                 required
+                disabled={isSubmitting}
               />
             </div>
             
-            <Button type="submit" className="w-full" variant="airbnb">
-              Sign In
+            <Button 
+              type="submit" 
+              className="w-full" 
+              variant="airbnb"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <Loader className="w-5 h-5 mr-2 border-white" /> Signing in...
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </Button>
             
             <p className="text-center text-sm">
@@ -137,73 +101,6 @@ const Login = () => {
             </p>
           </form>
         </Card>
-
-        <div className="space-y-6">
-          <div>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Test Accounts
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4">
-              {testUsers.map((user) => (
-                <Button
-                  key={user.email}
-                  variant="outline"
-                  className="py-6 justify-start gap-3 hover:bg-gray-50"
-                  onClick={() => handleTestUserLogin(user)}
-                >
-                  <div className="w-8 h-8 rounded-full bg-[#FF385C]/10 flex items-center justify-center text-[#FF385C] font-semibold shrink-0">
-                    {user.name.charAt(0)}
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-medium">{user.name}</h3>
-                    <p className="text-xs text-gray-500">{user.description}</p>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Guest Preview
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4">
-              {guestPreviews.map((guest) => (
-                <Card
-                  key={guest.eventId}
-                  className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleGuestPreview(guest.eventId)}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-semibold">
-                      G
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{guest.name}</h3>
-                      <p className="text-sm text-gray-500">{guest.description}</p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

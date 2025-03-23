@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
-import { getCurrentUser } from '@/lib/mockData';
+import { getCurrentUser } from '@/lib/data';
 import { messagesApi } from '@/lib/mock-db/api';
 import type { Message } from '@/lib/mock-db/types';
 import EventPreview from '@/components/EventPreview';
@@ -161,7 +161,25 @@ const AvatarScroller = () => {
 
 const Index = () => {
   const [randomMessages, setRandomMessages] = useState<Message[]>([]);
-  const currentUser = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Load current user
+    const loadUser = async () => {
+      try {
+        setLoading(true);
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadUser();
+  }, []);
 
   useEffect(() => {
     // Load messages for potential future use

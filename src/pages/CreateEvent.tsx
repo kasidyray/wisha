@@ -1,27 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import EventForm from '@/components/EventForm';
 import EventIllustration from '@/components/EventIllustration';
 import { toast } from 'sonner';
 import { UserAvatar } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { eventsApi } from '@/lib/mock-db/api';
+import { eventsService } from '@/services/events';
+import { uploadEventCoverImage } from '@/lib/data';
+import { Loader } from '@/components/ui/loader';
 
 const CreateEvent = () => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleCreateEvent = async (eventData: any) => {
     console.log('Event data submitted:', eventData);
     
+    setIsSubmitting(true);
+    
     try {
+      // Upload cover image if provided
+      let coverImageUrl = null;
+      if (eventData.coverImage && eventData.coverImage instanceof File) {
+        coverImageUrl = await uploadEventCoverImage(eventData.coverImage);
+      }
+      
       // Create the event
-      const newEvent = await eventsApi.create({
+      const newEvent = await eventsService.create({
         title: eventData.eventName,
         type: eventData.eventType,
         date: eventData.eventDate ? new Date(eventData.eventDate) : new Date(),
-        creatorId: currentUser?.id || 'guest',
-        description: eventData.message || `Welcome to ${eventData.eventName}`
+        creatorId: currentUser?.id || '00000000-0000-0000-0000-000000000000', // Use guest ID if not logged in
+        description: eventData.message || `Welcome to ${eventData.eventName}`,
+        coverImage: coverImageUrl
       });
       
       toast.success('Event created successfully!');
@@ -31,6 +43,8 @@ const CreateEvent = () => {
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error('Failed to create event. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
@@ -117,7 +131,14 @@ const CreateEvent = () => {
             <span className="text-xl font-bold">Wisha</span>
           </button>
           <div>
-            <EventForm onSubmit={handleCreateEvent} />
+            {isSubmitting ? (
+              <div className="flex flex-col items-center justify-center h-64">
+                <Loader className="h-12 w-12 border-4 border-[#FF385C] mb-4" />
+                <p className="text-gray-600">Creating your event...</p>
+              </div>
+            ) : (
+              <EventForm onSubmit={handleCreateEvent} />
+            )}
           </div>
         </div>
       </div>

@@ -2,14 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 interface EventFormProps {
   onSubmit: (eventData: any) => void;
@@ -131,16 +125,43 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
     }
   };
   
+  // Define event types with their categories and icons
   const eventTypes = [
-    { value: 'birthday', label: 'Birthday & Celebrations', icon: '🎂' },
-    { value: 'wedding', label: 'Wedding', icon: '💍' },
-    { value: 'graduation', label: 'Graduation', icon: '🎓' },
-    { value: 'anniversary', label: 'Anniversary', icon: '💝' },
-    { value: 'retirement', label: 'Retirement', icon: '🏖️' },
-    { value: 'babyShower', label: 'Baby Shower', icon: '👶' },
-    { value: 'farewell', label: 'Farewell', icon: '👋' },
-    { value: 'other', label: 'Other Occasion...', icon: '🎭' },
+    // Most Popular category
+    { value: 'birthday', label: 'Birthday & Celebrations', icon: '🎂', category: 'Most Popular' },
+    { value: 'congrats', label: 'Congrats & Praise', icon: '🎉', category: 'Most Popular' },
+    { value: 'farewell', label: 'Farewell', icon: '👋', category: 'Most Popular' },
+    { value: 'sympathy', label: 'Sympathy & Get Well', icon: '☀️', category: 'Most Popular' },
+    { value: 'thank-you', label: 'Thank You', icon: '😊', category: 'Most Popular' },
+    { value: 'welcome', label: 'Welcome & Onboarding', icon: '👋', category: 'Most Popular' },
+    { value: 'service-anniversary', label: 'Years of Service Anniversary', icon: '🏆', category: 'Most Popular' },
+    { value: 'other', label: 'Other Occasion...', icon: '🎭', category: 'Most Popular' },
+    
+    // More Occasions category
+    { value: 'christmas', label: 'Christmas', icon: '🎄', category: 'More Occasions' },
+    { value: 'easter', label: 'Easter', icon: '🥚', category: 'More Occasions' },
+    { value: 'fathers-day', label: 'Father\'s Day', icon: '👨', category: 'More Occasions' },
+    { value: 'fourth-of-july', label: 'Fourth of July', icon: '🇺🇸', category: 'More Occasions' },
+    { value: 'graduation', label: 'Graduation', icon: '🎓', category: 'More Occasions' },
+    { value: 'halloween', label: 'Halloween', icon: '🎃', category: 'More Occasions' },
+    { value: 'hanukkah', label: 'Hanukkah', icon: '🕎', category: 'More Occasions' },
+    { value: 'love', label: 'Love', icon: '❤️', category: 'More Occasions' },
+    { value: 'memorial', label: 'Memorial', icon: '🕯️', category: 'More Occasions' },
+    { value: 'mothers-day', label: 'Mother\'s Day', icon: '👩', category: 'More Occasions' },
+    { value: 'new-baby', label: 'New Baby', icon: '👶', category: 'More Occasions' },
+    { value: 'new-years', label: 'New Year\'s', icon: '🎆', category: 'More Occasions' },
+    { value: 'retirement', label: 'Retirement', icon: '🏖️', category: 'More Occasions' },
+    { value: 'staff-appreciation', label: 'Staff Appreciation Days', icon: '👏', category: 'More Occasions' },
+    { value: 'thanksgiving', label: 'Thanksgiving', icon: '🦃', category: 'More Occasions' },
+    { value: 'valentines-day', label: 'Valentine\'s Day', icon: '❤️', category: 'More Occasions' },
+    { value: 'wedding', label: 'Wedding & Anniversary', icon: '💍', category: 'More Occasions' },
+    { value: 'engagement', label: 'Engagement & Culture', icon: '📅', category: 'More Occasions' },
+    { value: 'shout-out', label: 'Shout Out Board', icon: '📣', category: 'More Occasions' },
   ];
+  
+  // Group event types by category for display
+  const popularEvents = eventTypes.filter(et => et.category === 'Most Popular');
+  const moreEvents = eventTypes.filter(et => et.category === 'More Occasions');
   
   return (
     <div className="w-full">
@@ -190,26 +211,35 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
               <label htmlFor="eventType" className="block mb-1.5 text-sm font-medium">
                 Event Type
               </label>
-              <div className="relative">
-                <Select
-                  value={formData.eventType}
-                  onValueChange={handleEventTypeChange}
-                >
-                  <SelectTrigger className="w-full rounded-xl border-gray-200">
-                    <SelectValue placeholder="Select event type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {eventTypes.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        <span className="flex items-center">
-                          <span className="mr-2 text-lg">{type.icon}</span>
-                          {type.label}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                value={formData.eventType}
+                onValueChange={handleEventTypeChange}
+              >
+                <SelectTrigger className="w-full rounded-xl border-gray-200">
+                  <SelectValue placeholder="Select event type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <div className="py-2 px-2 text-sm font-semibold text-gray-500">Most Popular</div>
+                  {popularEvents.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <span className="flex items-center">
+                        <span className="mr-2">{option.icon}</span>
+                        <span>{option.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                  
+                  <div className="py-2 px-2 text-sm font-semibold text-gray-500 pt-4 border-t">More Occasions</div>
+                  {moreEvents.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <span className="flex items-center">
+                        <span className="mr-2">{option.icon}</span>
+                        <span>{option.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="pt-6">

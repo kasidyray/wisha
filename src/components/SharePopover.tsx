@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Copy, Share, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -16,12 +16,49 @@ interface SharePopoverProps {
 }
 
 const SharePopover = ({ eventUrl, title = "Share Event" }: SharePopoverProps) => {
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const fallbackCopyToClipboard = (text: string) => {
+    // Create a temporary textarea element
+    const textArea = textAreaRef.current;
+    if (!textArea) return false;
+    
+    // Set the textarea value to the text we want to copy
+    textArea.value = text;
+    
+    // Make the textarea visible but keep it positioned outside the screen
+    textArea.style.display = '';
+    
+    // Select the text
+    textArea.select();
+    textArea.setSelectionRange(0, 99999); // For mobile devices
+    
+    // Try to copy using the document.execCommand
+    let successful = false;
+    try {
+      successful = document.execCommand('copy');
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    
+    // Hide the textarea again
+    textArea.style.display = 'none';
+    
+    return successful;
+  };
+
   const handleCopyLink = async () => {
     try {
+      // Try the modern clipboard API first
       await navigator.clipboard.writeText(eventUrl);
       toast.success('Link copied to clipboard!');
     } catch (error) {
-      toast.error('Failed to copy link');
+      // If it fails, use the fallback method
+      if (fallbackCopyToClipboard(eventUrl)) {
+        toast.success('Link copied to clipboard!');
+      } else {
+        toast.error('Failed to copy link');
+      }
     }
   };
 
@@ -143,6 +180,25 @@ const SharePopover = ({ eventUrl, title = "Share Event" }: SharePopoverProps) =>
           </div>
         </div>
       </PopoverContent>
+      
+      {/* Hidden textarea for fallback copy method */}
+      <textarea
+        ref={textAreaRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '1px',
+          height: '1px',
+          padding: 0,
+          border: 'none',
+          outline: 'none',
+          boxShadow: 'none',
+          background: 'transparent',
+          display: 'none'
+        }}
+        aria-hidden="true"
+      />
     </Popover>
   );
 };

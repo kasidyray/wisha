@@ -1,0 +1,32 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Trophy -->
+  <path d="M270 100H330V120C330 170 310 200 300 200C290 200 270 170 270 120V100Z" fill="#FCD34D"/>
+  <path d="M270 100H240C230 100 220 110 220 120C220 160 240 170 270 140V100Z" fill="#FBBF24"/>
+  <path d="M330 100H360C370 100 380 110 380 120C380 160 360 170 330 140V100Z" fill="#FBBF24"/>
+  <rect x="290" y="200" width="20" height="70" rx="2" fill="#FCD34D"/>
+  <rect x="250" y="270" width="100" height="20" rx="5" fill="#FCD34D"/>
+  
+  <!-- Trophy base -->
+  <rect x="250" y="290" width="100" height="10" rx="2" fill="#D1D5DB"/>
+  <rect x="240" y="300" width="120" height="20" rx="4" fill="#9CA3AF"/>
+  
+  <!-- Medal/circles -->
+  <circle cx="220" cy="200" r="30" fill="#BFDBFE"/>
+  <circle cx="220" cy="200" r="25" fill="#93C5FD"/>
+  <circle cx="220" cy="200" r="20" fill="#60A5FA"/>
+  <text x="220" y="208" font-size="24" font-weight="bold" text-anchor="middle" fill="white">5</text>
+  
+  <circle cx="380" cy="200" r="30" fill="#C7D2FE"/>
+  <circle cx="380" cy="200" r="25" fill="#A5B4FC"/>
+  <circle cx="380" cy="200" r="20" fill="#818CF8"/>
+  <text x="380" y="208" font-size="24" font-weight="bold" text-anchor="middle" fill="white">10</text>
+  
+  <!-- Stars -->
+  <path d="M300 50L310 70L330 75L315 90L320 110L300 100L280 110L285 90L270 75L290 70L300 50Z" fill="#FDE68A"/>
+  
+  <path d="M180 150L185 160L195 162L187 170L190 180L180 175L170 180L173 170L165 162L175 160L180 150Z" fill="#FDE68A"/>
+  
+  <path d="M420 150L425 160L435 162L427 170L430 180L420 175L410 180L413 170L405 162L415 160L420 150Z" fill="#FDE68A"/>
+</svg> 

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format, formatDistanceToNow } from 'date-fns';
 import { 
   PlusCircle, 
   Calendar, 
-  User, 
+  User as UserIcon, 
   Gift, 
   ChevronRight,
   MessageSquare,
@@ -14,24 +14,97 @@ import {
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { 
-  mockEvents, 
-  mockActivities, 
-  getCurrentUser,
-  type ActivityItem
-} from '@/lib/mockData';
+import { getCurrentUser, getUserEvents, getEventMessages } from '@/lib/data';
+import { getEventTypeImage } from '@/lib/event-type-images';
+import type { Event, Activity } from '@/lib/mock-db/types';
+import type { User } from '@/lib/mock-db/types';
+import { Loader } from '@/components/ui/loader';
+import { activitiesService } from '@/services/activities';
 
 const Dashboard = () => {
-  const currentUser = getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [messageCountByEvent, setMessageCountByEvent] = useState<{[key: string]: number}>({});
+  const [uniqueMessageParticipants, setUniqueMessageParticipants] = useState<number>(0);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Get current user
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+
+        if (user) {
+          // Load user's events
+          const userEvents = await getUserEvents(user.id);
+          setEvents(userEvents);
+
+          // Load activities for all the user's events
+          let allEventActivities: Activity[] = [];
+          await Promise.all(userEvents.map(async (event) => {
+            const eventActivities = await activitiesService.list(event.id, 50);
+            allEventActivities = [...allEventActivities, ...eventActivities];
+          }));
+          
+          setActivities(allEventActivities);
+          
+          // Load message counts for each event
+          const messageCounts: {[key: string]: number} = {};
+          const uniqueParticipants = new Set<string>();
+          
+          // Get message counts for each event
+          await Promise.all(userEvents.map(async (event) => {
+            const messages = await getEventMessages(event.id);
+            messageCounts[event.id] = messages.length;
+            
+            // Track unique participants (users who wrote messages)
+            messages.forEach(message => {
+              uniqueParticipants.add(message.author.id);
+            });
+          }));
+          
+          setMessageCountByEvent(messageCounts);
+          setUniqueMessageParticipants(uniqueParticipants.size);
+        }
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  // Filter activities to get only message-related ones for the user's events
+  const messageActivities = activities
+    .filter(activity => activity.type === 'new_message')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   
-  // Filter activities to get only message-related ones for events created by the current user
-  const messageActivities = mockActivities
-    .filter(activity => 
-      activity.type === 'new_message' && 
-      mockEvents.some(event => event.id === activity.eventId && event.creatorId === currentUser?.id)
-    )
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
-  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader className="h-12 w-12 border-4 border-[#FF385C]" />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Please log in to view your dashboard</h1>
+          <Link to="/login">
+            <Button variant="airbnb">Log In</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-50">
       {/* Header */}
@@ -83,7 +156,7 @@ const Dashboard = () => {
                   <Calendar className="h-6 w-6 text-[#FF385C]" />
                 </div>
                 <div>
-                  <div className="text-3xl font-bold">{mockEvents.length}</div>
+                  <div className="text-3xl font-bold">{events.length}</div>
                   <div className="text-sm text-gray-500">
                     Active events
                   </div>
@@ -99,14 +172,14 @@ const Dashboard = () => {
             <CardContent>
               <div className="flex items-center">
                 <div className="mr-4 rounded-full bg-[#FF385C]/10 p-3">
-                  <User className="h-6 w-6 text-[#FF385C]" />
+                  <UserIcon className="h-6 w-6 text-[#FF385C]" />
                 </div>
                 <div>
                   <div className="text-3xl font-bold">
-                    {mockEvents.reduce((sum, event) => sum + event.participantCount, 0)}
+                    {uniqueMessageParticipants}
                   </div>
                   <div className="text-sm text-gray-500">
-                    Across all events
+                    Who wrote messages
                   </div>
                 </div>
               </div>
@@ -124,7 +197,7 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <div className="text-3xl font-bold">
-                    {mockEvents.reduce((sum, event) => sum + event.itemCount, 0)}
+                    {events.reduce((sum, event) => sum + (event.itemCount || 0), 0)}
                   </div>
                   <div className="text-sm text-gray-500">
                     In your wishlists
@@ -139,55 +212,85 @@ const Dashboard = () => {
         <div className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Your Events</h2>
-            <Link to="/create-event" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
-              View All
-              <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+            {events.length > 5 && (
+              <Link to="/dashboard" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
+                View All
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockEvents.map((event) => (
-              <Link to={`/events/${event.id}`} key={event.id}>
-                <Card className="h-full hover:shadow-md transition-all duration-200 overflow-hidden border-none hover:-translate-y-1">
-                  <div className="aspect-[4/3] relative overflow-hidden">
-                    <img 
-                      src={event.coverImage || 'https://placehold.co/600x400'} 
-                      alt={event.title}
-                      className="w-full h-full object-cover rounded-t-xl"
-                    />
-                    <div className="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-xs font-medium shadow-sm">
-                      {event.type}
-                    </div>
-                  </div>
-                  <CardContent className="p-5">
-                    <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
-                    <p className="text-gray-500 text-sm mb-3">Created {format(event.date, 'MMMM dd, yyyy')}</p>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        {event.participantCount} messages
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {formatDistanceToNow(new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000))} ago
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+            {events.length > 0 ? (
+              <>
+                {events.map((event) => {
+                  // Get the appropriate image for this event type
+                  const { image: eventImage, alt: eventImageAlt } = getEventTypeImage(event.type);
+                  
+                  return (
+                    <Link to={`/events/${event.id}`} key={event.id}>
+                      <Card className="h-full hover:shadow-md transition-all duration-200 overflow-hidden border-none hover:-translate-y-1">
+                        <div className="aspect-[4/3] relative overflow-hidden bg-gray-50">
+                          <img 
+                            src={event.coverImage || eventImage} 
+                            alt={event.title || eventImageAlt}
+                            className="w-full h-full object-contain p-4"
+                            onError={(e) => {
+                              // If event cover image fails, fallback to event type image
+                              const target = e.target as HTMLImageElement;
+                              if (target.src !== eventImage) {
+                                target.src = eventImage;
+                              }
+                            }}
+                          />
+                          <div className="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-xs font-medium shadow-sm">
+                            {event.type}
+                          </div>
+                        </div>
+                        <CardContent className="p-5">
+                          <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
+                          <p className="text-gray-500 text-sm mb-3">Created {format(new Date(event.createdAt), 'MMMM dd, yyyy')}</p>
+                          <div className="flex justify-between text-sm text-gray-600">
+                            <div className="flex items-center">
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              {messageCountByEvent[event.id] || 0} messages
+                            </div>
+                            <div className="flex items-center">
+                              <Clock className="h-4 w-4 mr-1" />
+                              {formatDistanceToNow(new Date(event.updatedAt || event.createdAt))} ago
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
 
-            <Link to="/create-event">
-              <Card className="h-full border-dashed hover:shadow-md transition-all duration-200 flex flex-col justify-center items-center p-8 hover:bg-gray-50 hover:-translate-y-1">
-                <div className="w-16 h-16 rounded-full bg-[#FF385C]/10 flex items-center justify-center mb-4">
-                  <PlusCircle className="h-8 w-8 text-[#FF385C]" />
+                <Link to="/create-event">
+                  <Card className="h-full border-dashed hover:shadow-md transition-all duration-200 flex flex-col justify-center items-center p-8 hover:bg-gray-50 hover:-translate-y-1">
+                    <div className="w-16 h-16 rounded-full bg-[#FF385C]/10 flex items-center justify-center mb-4">
+                      <PlusCircle className="h-8 w-8 text-[#FF385C]" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Create New Event</h3>
+                    <p className="text-gray-500 text-sm text-center">
+                      Set up your next special occasion
+                    </p>
+                  </Card>
+                </Link>
+              </>
+            ) : (
+              <Card className="col-span-3 p-8 border hover:shadow-md transition-all duration-200">
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Calendar className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600 mb-4">You haven't created any events yet</p>
+                  <Link to="/create-event">
+                    <Button variant="airbnb">Create Your First Event</Button>
+                  </Link>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Create New Event</h3>
-                <p className="text-gray-500 text-sm text-center">
-                  Set up your next special occasion
-                </p>
               </Card>
-            </Link>
+            )}
           </div>
         </div>
 
@@ -203,9 +306,8 @@ const Dashboard = () => {
                   
                   {/* Timeline Items */}
                   <div className="space-y-6">
-                    {messageActivities.map((activity, index) => {
-                      const eventTitle = mockEvents.find(e => e.id === activity.eventId)?.title || '';
-                      const timeAgo = getTimeAgo(activity.date);
+                    {messageActivities.slice(0, 20).map((activity, index) => {
+                      const eventTitle = events.find(e => e.id === activity.eventId)?.title || '';
                       
                       return (
                         <div 
@@ -223,7 +325,7 @@ const Dashboard = () => {
                               {activity.userName} added a message
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
-                              {eventTitle} • {timeAgo}
+                              {eventTitle} • {formatDistanceToNow(new Date(activity.createdAt))} ago
                             </p>
                           </div>
                         </div>
@@ -240,31 +342,19 @@ const Dashboard = () => {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="border-t bg-gray-50 py-3 px-4 rounded-b-xl">
-              <Link to="/activity" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
-                View All Activity
-                <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </CardFooter>
+            {messageActivities.length > 20 && (
+              <CardFooter className="border-t bg-gray-50 py-3 px-4 rounded-b-xl">
+                <Link to="/dashboard" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">
+                  View All Activity
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </CardFooter>
+            )}
           </Card>
         </div>
       </div>
     </div>
   );
-};
-
-// Helper function to format time ago
-const getTimeAgo = (date: Date): string => {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffHours / 24);
-  
-  if (diffHours < 1) return 'just now';
-  if (diffHours === 1) return '1 hour ago';
-  if (diffHours < 24) return `${diffHours} hours ago`;
-  if (diffDays === 1) return '1 day ago';
-  return `${diffDays} days ago`;
 };
 
 export default Dashboard;

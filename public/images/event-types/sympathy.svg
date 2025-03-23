@@ -1,0 +1,29 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Sun with soft rays -->
+  <circle cx="300" cy="150" r="60" fill="#FDE68A"/>
+  <path d="M300 70V40" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M300 260V230" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M380 150H410" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M190 150H220" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M354 96L375 75" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M225 225L246 204" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M354 204L375 225" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M225 75L246 96" stroke="#FDE68A" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Flower 1 -->
+  <path d="M150 300C150 280 170 260 180 290C180 270 200 260 200 280C200 260 220 260 215 280C230 270 240 290 220 300C240 310 230 330 215 320C220 340 200 340 200 320C200 340 180 330 180 310C170 340 150 320 150 300Z" fill="#FCA5A5"/>
+  <circle cx="200" cy="300" r="15" fill="#FCD34D"/>
+  <path d="M200 330V360" stroke="#047857" stroke-width="6" stroke-linecap="round"/>
+  <path d="M190 340C170 330 180 350 200 360" stroke="#047857" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Flower 2 -->
+  <path d="M350 300C350 280 370 260 380 290C380 270 400 260 400 280C400 260 420 260 415 280C430 270 440 290 420 300C440 310 430 330 415 320C420 340 400 340 400 320C400 340 380 330 380 310C370 340 350 320 350 300Z" fill="#A5B4FC"/>
+  <circle cx="400" cy="300" r="15" fill="#FCD34D"/>
+  <path d="M400 330V360" stroke="#047857" stroke-width="6" stroke-linecap="round"/>
+  <path d="M410 340C430 330 420 350 400 360" stroke="#047857" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Gentle hills -->
+  <path d="M0 350C50 320 100 330 150 350C200 370 250 360 300 350C350 340 400 350 450 360C500 370 550 350 600 340V400H0V350Z" fill="#D1FAE5"/>
+</svg> 

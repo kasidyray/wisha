@@ -10,6 +10,8 @@ import Signup from '@/pages/Signup';
 import Dashboard from '@/pages/Dashboard';
 import CreateEvent from '@/pages/CreateEvent';
 import EventPage from '@/pages/EventPage';
+import TestSupabase from '@/pages/test-supabase';
+import TestStorage from '@/pages/test-storage';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/events/:id" element={<EventPage />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/test-supabase" element={<TestSupabase />} />
+          <Route path="/test-storage" element={<TestStorage />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={

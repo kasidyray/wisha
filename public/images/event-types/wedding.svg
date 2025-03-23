@@ -1,0 +1,28 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Left Ring (Gold) -->
+  <circle cx="240" cy="200" r="80" stroke="#F59E0B" stroke-width="20"/>
+  
+  <!-- Right Ring (Silver) -->
+  <circle cx="360" cy="200" r="80" stroke="#94A3B8" stroke-width="20"/>
+  
+  <!-- Wedding Bells -->
+  <path d="M300 100C310 100 320 110 320 120C320 130 310 150 300 150C290 150 280 130 280 120C280 110 290 100 300 100Z" fill="#FDE68A"/>
+  <path d="M300 150L300 170" stroke="#FDE68A" stroke-width="5"/>
+  <ellipse cx="300" cy="180" rx="10" ry="5" fill="#FDE68A"/>
+  
+  <!-- Flowers Top Left -->
+  <circle cx="150" cy="100" r="15" fill="#FECACA"/>
+  <circle cx="165" cy="85" r="15" fill="#FECACA"/>
+  <circle cx="135" cy="85" r="15" fill="#FECACA"/>
+  <circle cx="150" cy="70" r="15" fill="#FECACA"/>
+  <circle cx="150" cy="100" r="8" fill="#FCD34D"/>
+  
+  <!-- Flowers Bottom Right -->
+  <circle cx="450" cy="300" r="15" fill="#FECACA"/>
+  <circle cx="465" cy="285" r="15" fill="#FECACA"/>
+  <circle cx="435" cy="285" r="15" fill="#FECACA"/>
+  <circle cx="450" cy="270" r="15" fill="#FECACA"/>
+  <circle cx="450" cy="300" r="8" fill="#FCD34D"/>
+</svg> 

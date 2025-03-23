@@ -1,0 +1,31 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Cake Base -->
+  <rect x="200" y="220" width="200" height="100" rx="10" fill="#FDBA74"/>
+  
+  <!-- Cake Frosting -->
+  <path d="M200 220C200 214.477 204.477 210 210 210H390C395.523 210 400 214.477 400 220V230H200V220Z" fill="#FED7AA"/>
+  
+  <!-- Candles -->
+  <rect x="240" y="170" width="10" height="40" rx="5" fill="#BFDBFE"/>
+  <rect x="295" y="150" width="10" height="60" rx="5" fill="#FCA5A5"/>
+  <rect x="350" y="170" width="10" height="40" rx="5" fill="#BBF7D0"/>
+  
+  <!-- Candle Flames -->
+  <ellipse cx="245" cy="165" rx="10" ry="15" fill="#FBBF24"/>
+  <ellipse cx="300" cy="145" rx="10" ry="15" fill="#FBBF24"/>
+  <ellipse cx="355" cy="165" rx="10" ry="15" fill="#FBBF24"/>
+  
+  <!-- Balloons -->
+  <ellipse cx="150" cy="130" rx="40" ry="50" fill="#FCA5A5"/>
+  <ellipse cx="450" cy="130" rx="40" ry="50" fill="#BBF7D0"/>
+  <ellipse cx="110" cy="160" rx="30" ry="40" fill="#93C5FD"/>
+  <ellipse cx="490" cy="160" rx="30" ry="40" fill="#FDE68A"/>
+  
+  <!-- Balloon Strings -->
+  <path d="M150 180C160 210 180 250 180 320" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M450 180C440 210 420 250 420 320" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M110 200C120 230 140 270 150 340" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M490 200C480 230 460 270 450 340" stroke="#6B7280" stroke-width="2" stroke-dasharray="4 4"/>
+</svg> 

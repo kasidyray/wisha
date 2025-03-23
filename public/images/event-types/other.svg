@@ -1,0 +1,35 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="600" height="400" fill="#F9FAFB"/>
+  
+  <!-- Decorative ribbons -->
+  <path d="M200 100C250 150 250 250 200 300" stroke="#FB7185" stroke-width="10" stroke-linecap="round" stroke-dasharray="20 15"/>
+  <path d="M400 100C350 150 350 250 400 300" stroke="#60A5FA" stroke-width="10" stroke-linecap="round" stroke-dasharray="20 15"/>
+  
+  <!-- Stars -->
+  <path d="M300 80L310 100L330 105L315 120L320 140L300 130L280 140L285 120L270 105L290 100L300 80Z" fill="#FDE68A"/>
+  <path d="M150 190L155 200L165 202L157 210L160 220L150 215L140 220L143 210L135 202L145 200L150 190Z" fill="#A5B4FC"/>
+  <path d="M450 190L455 200L465 202L457 210L460 220L450 215L440 220L443 210L435 202L445 200L450 190Z" fill="#A5B4FC"/>
+  
+  <!-- Gift box -->
+  <rect x="250" y="200" width="100" height="100" rx="10" fill="#FCA5A5"/>
+  <rect x="250" y="230" width="100" height="40" fill="#F87171"/>
+  <rect x="280" y="200" width="40" height="100" fill="#F87171"/>
+  
+  <!-- Bow -->
+  <ellipse cx="300" cy="190" rx="25" ry="15" fill="#FECACA"/>
+  <ellipse cx="275" cy="190" rx="15" ry="10" transform="rotate(-30 275 190)" fill="#FECACA"/>
+  <ellipse cx="325" cy="190" rx="15" ry="10" transform="rotate(30 325 190)" fill="#FECACA"/>
+  <path d="M290 190L280 210" stroke="#FECACA" stroke-width="5" stroke-linecap="round"/>
+  <path d="M310 190L320 210" stroke="#FECACA" stroke-width="5" stroke-linecap="round"/>
+  
+  <!-- Confetti -->
+  <rect x="150" y="130" width="10" height="10" rx="2" transform="rotate(45 150 130)" fill="#34D399"/>
+  <rect x="180" y="150" width="8" height="8" rx="2" transform="rotate(30 180 150)" fill="#F472B6"/>
+  <rect x="440" y="140" width="10" height="10" rx="2" transform="rotate(-45 440 140)" fill="#34D399"/>
+  <rect x="410" y="160" width="8" height="8" rx="2" transform="rotate(-30 410 160)" fill="#F472B6"/>
+  
+  <rect x="200" y="300" width="10" height="10" rx="2" transform="rotate(75 200 300)" fill="#A78BFA"/>
+  <rect x="400" y="310" width="8" height="8" rx="2" transform="rotate(-75 400 310)" fill="#A78BFA"/>
+  <rect x="250" y="330" width="12" height="12" rx="2" transform="rotate(15 250 330)" fill="#FBBF24"/>
+  <rect x="350" y="330" width="12" height="12" rx="2" transform="rotate(-15 350 330)" fill="#FBBF24"/>
+</svg> 

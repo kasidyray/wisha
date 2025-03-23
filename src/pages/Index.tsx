@@ -186,13 +186,11 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden flex flex-col bg-gradient-to-b from-[#FFFFFF] to-[#F8F9FA] text-gray-900 font-quicklnk relative">
-      {/* Soft radial gradients for visual interest */}
+    <div className="min-h-screen overflow-x-hidden flex flex-col bg-gradient-to-br from-[#FAFAFA] via-white to-[#F0F4F8] text-gray-900 font-quicklnk relative">
+      {/* Minimal soft gradients for visual interest */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-20%] left-[-15%] w-[65vw] h-[65vw] rounded-full radial-gradient from-pink-300/50 to-transparent"></div>
-        <div className="absolute top-[20%] right-[-20%] w-[60vw] h-[60vw] rounded-full radial-gradient from-blue-300/40 to-transparent"></div>
-        <div className="absolute bottom-[10%] left-[10%] w-[50vw] h-[50vw] rounded-full radial-gradient from-purple-300/40 to-transparent"></div>
-        <div className="absolute top-[40%] left-[30%] w-[40vw] h-[40vw] rounded-full radial-gradient from-yellow-300/30 to-transparent"></div>
+        <div className="absolute top-[-10%] right-[-5%] w-[50vw] h-[50vw] rounded-full opacity-40 blur-3xl bg-gradient-to-br from-[#FFE1E7] to-[#FFC7D5]"></div>
+        <div className="absolute bottom-[20%] left-[-10%] w-[40vw] h-[40vw] rounded-full opacity-30 blur-3xl bg-gradient-to-tr from-[#E1EBFF] to-[#C7D5FF]"></div>
       </div>
       
       {/* Header */}
@@ -233,7 +231,7 @@ const Index = () => {
           <div className="mx-auto max-w-3xl">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-quicklnk-heading leading-[1.1] mb-6">
               Share Moments <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF385C] to-pink-500">Beyond Time</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#FF385C] via-[#FF6B81] to-[#FF8A9A]">Beyond Time</span>
             </h1>
             
             <p className="text-gray-600 text-xl md:text-2xl font-light mt-6 mx-auto max-w-2xl">

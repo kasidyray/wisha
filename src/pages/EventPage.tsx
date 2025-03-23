@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import { eventsApi, messagesApi } from '@/lib/mock-db/api';
 import type { Message, Event, User } from '@/lib/mock-db/types';
 
-const GIPHY_API_KEY = 'YOUR_GIPHY_API_KEY'; // Replace with your actual Giphy API key
+const GIPHY_API_KEY = 'hpvZycW22qCjn5cRM1xtWB8NKq4dQ2My'; // Replace with your actual Giphy API key when deploying
 
 const EventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,6 +50,8 @@ const EventPage = () => {
     mediaType: null as 'image' | 'video' | 'audio' | 'gif' | null,
     gifUrl: ''
   });
+
+  const [messageNameMap, setMessageNameMap] = useState<Record<string, string>>({});
 
   // Update newMessage when currentUser changes
   useEffect(() => {
@@ -180,6 +182,12 @@ const EventPage = () => {
               }
             : undefined
       });
+      
+      // Store the custom name separately
+      setMessageNameMap(prev => ({
+        ...prev,
+        [message.id]: newMessage.name
+      }));
       
       // Add to messages
       setMessages([message, ...messages]);
@@ -366,6 +374,38 @@ const EventPage = () => {
     }
   }, [isModalOpen]);
 
+  // Load default GIFs based on event title and type when GIF search is opened
+  useEffect(() => {
+    if (isGifSearchOpen && event) {
+      // Construct search term based on event title and type
+      const searchTerm = `${event.type || ''} ${event.title || ''}`.trim();
+      if (searchTerm) {
+        setGifSearchTerm(searchTerm);
+        searchGifs(searchTerm);
+      } else {
+        // Fallback to general celebration GIFs
+        setGifSearchTerm('celebration');
+        searchGifs('celebration');
+      }
+    }
+  }, [isGifSearchOpen, event]);
+
+  // Toggle body scroll when modal opens/closes
+  useEffect(() => {
+    if (isModalOpen) {
+      // Prevent scrolling on the body when modal is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable scrolling when modal is closed
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      // Cleanup - ensure scrolling is re-enabled when component unmounts
+      document.body.style.overflow = '';
+    };
+  }, [isModalOpen]);
+
   if (!event || !host) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -419,12 +459,21 @@ const EventPage = () => {
               {event?.title}
             </h1>
           </div>
-          {currentUser && (
-              <div>
+          {currentUser ? (
+            <div>
               <Avatar className="h-12 w-12">
                 <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
                 <AvatarFallback>{currentUser.name?.substring(0, 2)}</AvatarFallback>
               </Avatar>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Link to="/login">
+                <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">Log in</Button>
+              </Link>
+              <Link to="/signup">
+                <Button variant="airbnb" className="rounded-full">Sign up</Button>
+              </Link>
             </div>
           )}
         </div>
@@ -513,7 +562,7 @@ const EventPage = () => {
                   <div className="p-4 relative">
                     <p className="text-gray-800">{message.content}</p>
                     <p className="text-right mt-3 italic font-handwriting text-gray-600">
-                      ~ {message.author.name}
+                      ~ {messageNameMap[message.id] || message.author?.name || 'Anonymous'}
                     </p>
                   </div>
                 </div>
@@ -522,7 +571,7 @@ const EventPage = () => {
           )}
         </div>
       </div>
-
+      
       {/* Fixed Add Message Button */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40">
         <Button 
@@ -543,8 +592,8 @@ const EventPage = () => {
           <Plus className="mr-2 h-5 w-5" />
           Add Message
         </Button>
-      </div>
-
+            </div>
+            
       {/* Custom Mobile-Friendly Modal Implementation */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex md:items-center justify-center">
@@ -558,11 +607,11 @@ const EventPage = () => {
           <div 
             ref={modalRef}
             className="relative w-full md:w-[500px] bg-white md:rounded-xl shadow-xl
-                      flex flex-col h-screen md:h-auto md:max-h-[80vh] overflow-hidden z-10"
+                      flex flex-col h-[100vh] md:h-auto md:min-h-[400px] md:max-h-[80vh] overflow-hidden z-10"
             style={{
-              // On mobile, adjust position based on keyboard height
-              maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : undefined,
-              height: keyboardHeight > 0 ? 'auto' : undefined
+              // On mobile, adjust position based on keyboard height and viewport
+              height: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : '100vh',
+              maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight}px)` : undefined
             }}
           >
             {/* Modal Header */}
@@ -579,66 +628,72 @@ const EventPage = () => {
                 <span className="text-sm font-semibold">New message</span>
               </div>
               <div className="w-8 h-8"></div> {/* Empty div for flex spacing */}
-            </div>
-            
+              </div>
+              
             {/* Modal Body with Flexible Height */}
             <div className="flex-grow overflow-auto">
               {isGifSearchOpen ? (
-                <div className="p-4">
-                  <div className="mb-4 flex gap-2">
-                    <Input
-                      value={gifSearchTerm}
-                      onChange={(e) => setGifSearchTerm(e.target.value)}
-                      placeholder="Search for GIFs..."
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={() => searchGifs(gifSearchTerm)}
-                      className="bg-[#FF385C] hover:bg-[#FF385C]/90 text-white"
-                    >
-                      Search
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 mt-2 max-h-[300px] overflow-y-auto">
-                    {gifResults.map((gif) => (
-                      <div 
-                        key={gif.id} 
-                        className="cursor-pointer rounded-md overflow-hidden hover:opacity-80 transition-opacity"
-                        onClick={() => handleGifSelect(gif.images.fixed_height.url)}
+                <div className="h-full flex flex-col">
+                  <div className="sticky top-0 z-10 bg-white p-4 border-b">
+                    <div className="flex gap-2">
+                      <Input
+                        value={gifSearchTerm}
+                        onChange={(e) => setGifSearchTerm(e.target.value)}
+                        placeholder="Search for GIFs..."
+                        className="flex-1"
+                      />
+                      <Button 
+                        onClick={() => searchGifs(gifSearchTerm)}
+                        className="bg-[#FF385C] hover:bg-[#FF385C]/90 text-white"
                       >
-                        <img 
-                          src={gif.images.fixed_height_small.url} 
-                          alt={gif.title}
-                          className="w-full h-auto" 
-                        />
-                      </div>
-                    ))}
+                        Search
+                      </Button>
+                    </div>
                   </div>
                   
-                  {gifResults.length === 0 && gifSearchTerm && (
-                    <div className="text-center py-8 text-gray-500">
-                      No GIFs found. Try another search term.
-                    </div>
+                  <div className="p-4 flex-1 overflow-auto">
+                    <div className="grid grid-cols-2 gap-2">
+                      {gifResults.map((gif) => (
+                        <div 
+                          key={gif.id} 
+                          className="cursor-pointer rounded-md overflow-hidden hover:opacity-80 transition-opacity"
+                          onClick={() => handleGifSelect(gif.images.fixed_height.url)}
+                        >
+                          <img 
+                            src={gif.images.fixed_height_small.url} 
+                            alt={gif.title}
+                            className="w-full h-auto" 
+                          />
+                        </div>
+                      ))}
+                      
+                      {gifResults.length === 0 && gifSearchTerm && (
+                        <div className="text-center py-8 text-gray-500 col-span-2">
+                          No GIFs found. Try another search term.
+                        </div>
                   )}
-                  
-                  <Button 
-                    className="mt-4 w-full"
-                    variant="outline"
-                    onClick={() => setIsGifSearchOpen(false)}
-                  >
-                    Cancel
-                  </Button>
                 </div>
-              ) : (
+              </div>
+              
+                  <div className="p-4 bg-white border-t sticky bottom-0">
+                <Button 
+                      className="w-full"
+                  variant="outline" 
+                      onClick={() => setIsGifSearchOpen(false)}
+                    >
+                      Cancel
+                </Button>
+              </div>
+          </div>
+        ) : (
                 <form onSubmit={handleSubmit} className="space-y-0 p-0 h-full flex flex-col">
                   <div className="flex p-4 pb-0 flex-grow overflow-auto">
                     <div className="mr-3 flex-shrink-0">
                       <div className="h-10 w-10 bg-[#FF385C] rounded-full flex items-center justify-center text-white font-semibold">
                         {currentUser?.name?.charAt(0) || newMessage.name.charAt(0) || '?'}
                       </div>
-                    </div>
-                    
+            </div>
+            
                     <div className="flex-1 min-h-0">
                       {!currentUser && (
                         <Input
@@ -666,7 +721,7 @@ const EventPage = () => {
                   </div>
                   
                   {(newMessage.mediaFile && newMessage.mediaType) || newMessage.gifUrl ? (
-                    <div className="mx-4 mt-3 relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                    <div className="mx-4 mt-3 mb-16 relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
                       {newMessage.mediaType === 'gif' && newMessage.gifUrl ? (
                         <img 
                           src={newMessage.gifUrl} 
@@ -705,7 +760,7 @@ const EventPage = () => {
                   ) : null}
                   
                   {/* Footer that stays visible above keyboard */}
-                  <div className="p-4 pt-3 border-t mt-auto sticky bottom-0 bg-white z-10">
+                  <div className="p-4 pt-3 border-t fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto bg-white z-10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <TooltipProvider>
@@ -762,23 +817,23 @@ const EventPage = () => {
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
-                      </div>
-                      
+            </div>
+            
                       <Button 
                         type="submit" 
                         className="rounded-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white font-semibold px-5"
                         disabled={!newMessage.message.trim()}
                       >
                         Post
-                      </Button>
+              </Button>
                     </div>
                   </div>
                 </form>
               )}
             </div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 };

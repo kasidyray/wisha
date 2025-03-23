@@ -133,13 +133,9 @@ const UserAvatar = ({ user, className }: UserAvatarProps) => {
       <DropdownMenuTrigger className="outline-none">
         <div className="flex items-center gap-2 rounded-full border bg-white px-2 py-1 hover:shadow-sm transition-all duration-200">
           <Avatar className={className}>
-            {user.avatarUrl ? (
-              <AvatarImage src={user.avatarUrl} alt={formattedName} />
-            ) : (
-              <AvatarFallback className="bg-[#FF385C]/10 text-[#FF385C] font-medium">
-                {formattedName.charAt(0)}
-              </AvatarFallback>
-            )}
+            <AvatarFallback className="bg-[#FF385C]/10 text-[#FF385C] font-medium">
+              {formattedName.charAt(0)}
+            </AvatarFallback>
           </Avatar>
           <ChevronDown className="h-4 w-4 text-gray-500" />
         </div>
@@ -151,25 +147,25 @@ const UserAvatar = ({ user, className }: UserAvatarProps) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2"
+          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2 group"
           onClick={() => navigate('/dashboard')}
         >
-          <LayoutDashboard className="h-4 w-4 text-gray-500" />
+          <LayoutDashboard className="h-4 w-4 text-gray-500 group-hover:text-current" />
           <span>Dashboard</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
-          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2"
+          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2 group"
           onClick={() => navigate('/create-event')}
         >
-          <PlusCircle className="h-4 w-4 text-gray-500" />
+          <PlusCircle className="h-4 w-4 text-gray-500 group-hover:text-current" />
           <span>Create Event</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
-          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2 text-red-500"
+          className="cursor-pointer hover:bg-[#FF385C]/10 rounded-lg py-2 px-2 my-1 gap-2 text-red-500 group"
           onClick={logout}
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 group-hover:text-current" />
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

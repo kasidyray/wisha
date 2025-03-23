@@ -125,22 +125,49 @@ export const mockMessages: Message[] = [
 export const mockActivities: ActivityItem[] = [
   {
     id: 'a1',
-    type: 'join_event',
-    eventId: 'e3',
-    userName: 'Alex',
+    type: 'new_message',
+    eventId: 'e1',
+    userId: 'u2',
+    userName: 'Jane',
     date: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
   },
   {
     id: 'a2',
-    type: 'add_item',
-    eventId: 'e1',
-    userName: 'Jessica',
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    type: 'new_message',
+    eventId: 'e2',
+    userId: 'u3',
+    userName: 'Mike',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 10), // 10 hours ago
   },
   {
     id: 'a3',
+    type: 'new_message',
+    eventId: 'e1',
+    userId: 'u4',
+    userName: 'Sarah',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+  },
+  {
+    id: 'a4',
+    type: 'join_event',
+    eventId: 'e2',
+    userId: 'u5',
+    userName: 'Alex',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 36), // 1.5 days ago
+  },
+  {
+    id: 'a5',
+    type: 'new_message',
+    eventId: 'e2',
+    userId: 'u6',
+    userName: 'Emma',
+    date: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
+  },
+  {
+    id: 'a6',
     type: 'update_event',
     eventId: 'e2',
+    userId: 'u1',
     userName: 'John',
     date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
     details: 'Updated event date'

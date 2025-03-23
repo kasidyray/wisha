@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Play, Pause, Image as ImageIcon, Volume2 } from 'lucide-react';
 
@@ -17,7 +16,6 @@ const MessageCard: React.FC<MessageCardProps> = ({
   date,
   mediaType,
   mediaUrl,
-  avatarUrl,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isImageExpanded, setIsImageExpanded] = useState(false);
@@ -38,17 +36,9 @@ const MessageCard: React.FC<MessageCardProps> = ({
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md animate-fade-in">
       <div className="p-4">
         <div className="flex items-center mb-3">
-          {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
-              alt={name} 
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-10 h-10 bg-champagne-200 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium">{getInitials(name)}</span>
-            </div>
-          )}
+          <div className="w-10 h-10 bg-[#FF385C]/10 rounded-full flex items-center justify-center">
+            <span className="text-sm font-medium text-[#FF385C]">{getInitials(name)}</span>
+          </div>
           <div className="ml-3">
             <h3 className="font-medium">{name}</h3>
             <p className="text-xs text-muted-foreground">{date}</p>

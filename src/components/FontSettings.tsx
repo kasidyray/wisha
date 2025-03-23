@@ -1,5 +1,5 @@
-import React from 'react';
-import { Settings, Check } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Settings, Check, Upload } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -9,26 +9,38 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 
 interface FontSettingsProps {
   currentFont: string;
   onFontChange: (font: string) => void;
   currentBgColor?: string;
   onBgColorChange?: (color: string) => void;
+  currentBgImage?: string;
+  onBgImageChange?: (imageUrl: string) => void;
 }
 
 const FontSettings = ({ 
   currentFont, 
   onFontChange,
-  currentBgColor = 'bg-white',
-  onBgColorChange = () => {}
+  currentBgColor = 'bg-[rgb(255,228,233)]',
+  onBgColorChange = () => {},
+  currentBgImage = '',
+  onBgImageChange = () => {}
 }: FontSettingsProps) => {
+  const [activeBackgroundTab, setActiveBackgroundTab] = useState<'color' | 'image'>('color');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const fonts = [
     { value: 'font-sans', label: 'Sans Serif' },
     { value: 'font-serif', label: 'Serif' },
+    { value: 'font-mono', label: 'Monospace' },
+    { value: 'font-handwriting', label: 'Handwriting' },
+    { value: 'font-display', label: 'Display' },
   ];
 
   const backgroundColors = [
+    { value: 'bg-[rgb(255,228,233)]', color: 'rgb(255,228,233)' }, // Light Pink (Default)
     { value: 'bg-[#4A1942]', color: '#4A1942' }, // Purple
     { value: 'bg-[#C5A14E]', color: '#C5A14E' }, // Gold
     { value: 'bg-[#BFD345]', color: '#BFD345' }, // Lime
@@ -42,6 +54,33 @@ const FontSettings = ({
     { value: 'bg-[#E0E0E0]', color: '#E0E0E0' }, // Light Gray
     { value: 'bg-white', color: '#FFFFFF' },     // White
   ];
+
+  const backgroundImages = [
+    { value: 'url(/images/backgrounds/bg-pattern-1.jpg)', thumbnail: '/images/backgrounds/bg-pattern-1.jpg' },
+    { value: 'url(/images/backgrounds/bg-pattern-2.jpg)', thumbnail: '/images/backgrounds/bg-pattern-2.jpg' },
+    { value: 'url(/images/backgrounds/bg-pattern-3.jpg)', thumbnail: '/images/backgrounds/bg-pattern-3.jpg' },
+    { value: 'url(/images/backgrounds/bg-pattern-4.jpg)', thumbnail: '/images/backgrounds/bg-pattern-4.jpg' },
+    { value: 'url(/images/backgrounds/bg-pattern-5.jpg)', thumbnail: '/images/backgrounds/bg-pattern-5.jpg' },
+    { value: 'url(/images/backgrounds/bg-pattern-6.jpg)', thumbnail: '/images/backgrounds/bg-pattern-6.jpg' },
+  ];
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      onBgImageChange(`url(${imageUrl})`);
+    }
+  };
+
+  const handleBackgroundSelection = (type: 'color' | 'image') => {
+    setActiveBackgroundTab(type);
+    // Reset the other background type when switching
+    if (type === 'color' && currentBgImage) {
+      onBgImageChange('');
+    } else if (type === 'image' && currentBgColor !== 'bg-[rgb(255,228,233)]') {
+      onBgColorChange('bg-[rgb(255,228,233)]');
+    }
+  };
 
   return (
     <Popover>
@@ -62,25 +101,95 @@ const FontSettings = ({
           </TabsList>
           
           <TabsContent value="background" className="p-4">
-            <h4 className="font-medium mb-3">Background</h4>
-            <div className="grid grid-cols-6 gap-2">
-              {backgroundColors.map((bgColor) => (
-                <button
-                  key={bgColor.value}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${bgColor.value} border-2 ${
-                    currentBgColor === bgColor.value ? 'border-black' : 'border-transparent'
-                  }`}
-                  onClick={() => onBgColorChange(bgColor.value)}
-                  style={{ 
-                    boxShadow: currentBgColor === bgColor.value ? '0 0 0 2px rgba(0,0,0,0.1)' : 'none'
-                  }}
-                >
-                  {currentBgColor === bgColor.value && (
-                    <Check className={`h-4 w-4 ${bgColor.value === 'bg-white' ? 'text-black' : 'text-white'}`} />
-                  )}
-                </button>
-              ))}
+            <div className="flex gap-2 mb-3">
+              <Button 
+                variant={activeBackgroundTab === 'color' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleBackgroundSelection('color')}
+                className="flex-1"
+              >
+                Color
+              </Button>
+              <Button 
+                variant={activeBackgroundTab === 'image' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleBackgroundSelection('image')}
+                className="flex-1"
+              >
+                Image
+              </Button>
             </div>
+            
+            {activeBackgroundTab === 'color' && (
+              <div className="grid grid-cols-6 gap-2">
+                {backgroundColors.map((bgColor) => (
+                  <button
+                    key={bgColor.value}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${bgColor.value} border-2 ${
+                      currentBgColor === bgColor.value ? 'border-black' : 'border-transparent'
+                    }`}
+                    onClick={() => onBgColorChange(bgColor.value)}
+                    style={{ 
+                      boxShadow: currentBgColor === bgColor.value ? '0 0 0 2px rgba(0,0,0,0.1)' : 'none'
+                    }}
+                  >
+                    {currentBgColor === bgColor.value && (
+                      <Check className={`h-4 w-4 ${
+                        bgColor.value === 'bg-white' || bgColor.value === 'bg-[rgb(255,228,233)]' 
+                        ? 'text-black' 
+                        : 'text-white'
+                      }`} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {activeBackgroundTab === 'image' && (
+              <>
+                <div className="grid grid-cols-3 gap-2">
+                  {backgroundImages.map((bgImage) => (
+                    <button
+                      key={bgImage.value}
+                      className={`h-20 rounded-md flex items-center justify-center transition-all bg-cover bg-center border-2 ${
+                        currentBgImage === bgImage.value ? 'border-black' : 'border-transparent'
+                      }`}
+                      style={{ 
+                        backgroundImage: bgImage.value,
+                        boxShadow: currentBgImage === bgImage.value ? '0 0 0 2px rgba(0,0,0,0.1)' : 'none'
+                      }}
+                      onClick={() => onBgImageChange(bgImage.value)}
+                    >
+                      {currentBgImage === bgImage.value && (
+                        <div className="bg-black/30 rounded-full p-1">
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    ref={fileInputRef}
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    className="w-full flex items-center gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span>Upload Custom Background</span>
+                  </Button>
+                </div>
+              </>
+            )}
           </TabsContent>
           
           <TabsContent value="font" className="p-4 space-y-4">

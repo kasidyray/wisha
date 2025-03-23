@@ -8,7 +8,8 @@ import {
   Gift, 
   ChevronRight,
   MessageSquare,
-  Clock
+  Clock,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
@@ -22,6 +23,14 @@ import {
 
 const Dashboard = () => {
   const currentUser = getCurrentUser();
+  
+  // Filter activities to get only message-related ones for events created by the current user
+  const messageActivities = mockActivities
+    .filter(activity => 
+      activity.type === 'new_message' && 
+      mockEvents.some(event => event.id === activity.eventId && event.creatorId === currentUser?.id)
+    )
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-50">
@@ -182,35 +191,54 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Activity Section */}
+        {/* Recent Activity Section - Vertical Timeline */}
         <div>
           <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
           <Card>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {mockActivities.slice(0, 3).map((activity) => {
-                  const eventTitle = mockEvents.find(e => e.id === activity.eventId)?.title || '';
-                  const timeAgo = getTimeAgo(activity.date);
+            <CardContent className="p-6">
+              {messageActivities.length > 0 ? (
+                <div className="relative">
+                  {/* Vertical Timeline Line */}
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
                   
-                  return (
-                    <div key={activity.id} className="p-4 flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-[#FF385C]/20 flex items-center justify-center mr-4">
-                        {activity.type === 'join_event' && <User className="h-5 w-5 text-[#FF385C]" />}
-                        {activity.type === 'add_item' && <Gift className="h-5 w-5 text-[#FF385C]" />}
-                        {activity.type === 'update_event' && <Calendar className="h-5 w-5 text-[#FF385C]" />}
-                      </div>
-                      <div>
-                        <p className="font-medium">
-                          {activity.type === 'join_event' && `${activity.userName} joined your event`}
-                          {activity.type === 'add_item' && `New item added to your wishlist`}
-                          {activity.type === 'update_event' && `Event ${activity.details || 'updated'}`}
-                        </p>
-                        <p className="text-sm text-gray-500">{eventTitle} • {timeAgo}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                  {/* Timeline Items */}
+                  <div className="space-y-6">
+                    {messageActivities.map((activity, index) => {
+                      const eventTitle = mockEvents.find(e => e.id === activity.eventId)?.title || '';
+                      const timeAgo = getTimeAgo(activity.date);
+                      
+                      return (
+                        <div 
+                          key={activity.id} 
+                          className="relative pl-14"
+                        >
+                          {/* Timeline Dot */}
+                          <div className="absolute left-0 top-0 w-8 h-8 rounded-full bg-[#FF385C]/10 flex items-center justify-center z-10">
+                            <MessageCircle className="h-4 w-4 text-[#FF385C]" />
+                          </div>
+                          
+                          {/* Content Box */}
+                          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                            <p className="font-medium text-gray-800">
+                              {activity.userName} added a message
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {eventTitle} • {timeAgo}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <MessageCircle className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-gray-600">No recent message activities</p>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="border-t bg-gray-50 py-3 px-4 rounded-b-xl">
               <Link to="/activity" className="text-[#FF385C] hover:underline text-sm font-medium flex items-center">

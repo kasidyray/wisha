@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Send, Mic, X, Calendar, Users, Gift, MessageSquare, Image as ImageIcon, Plus, FileImage } from 'lucide-react';
+import { Send, Mic, X, Calendar, Users, Gift, MessageSquare, Image as ImageIcon, Plus, FileImage, PenLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { eventsApi, messagesApi } from '@/lib/mock-db/api';
 import type { Message, Event, User } from '@/lib/mock-db/types';
+import { MessageSkeletonGrid } from '@/components/MessageSkeleton';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -80,7 +81,8 @@ const EventPage = () => {
   const [loadingError, setLoadingError] = useState<string | null>(null);
   
   const [currentFont, setCurrentFont] = useState('font-sans');
-  const [currentBgColor, setCurrentBgColor] = useState('bg-white');
+  const [currentBgColor, setCurrentBgColor] = useState('bg-[rgb(255,228,233)]');
+  const [currentBgImage, setCurrentBgImage] = useState('');
   const eventUrl = window.location.href;
   
   // Search for GIFs using Giphy API
@@ -268,6 +270,7 @@ const EventPage = () => {
     if (id) {
       const savedFont = localStorage.getItem(`event_${id}_font`);
       const savedBgColor = localStorage.getItem(`event_${id}_bgColor`);
+      const savedBgImage = localStorage.getItem(`event_${id}_bgImage`);
       
       if (savedFont) {
         setCurrentFont(savedFont);
@@ -275,6 +278,10 @@ const EventPage = () => {
       
       if (savedBgColor) {
         setCurrentBgColor(savedBgColor);
+      }
+      
+      if (savedBgImage) {
+        setCurrentBgImage(savedBgImage);
       }
     }
   }, [id]);
@@ -303,8 +310,19 @@ const EventPage = () => {
   
   const handleBgColorChange = (color: string) => {
     setCurrentBgColor(color);
+    setCurrentBgImage(''); // Reset background image when color is set
     if (id) {
       localStorage.setItem(`event_${id}_bgColor`, color);
+      localStorage.removeItem(`event_${id}_bgImage`);
+    }
+  };
+  
+  const handleBgImageChange = (imageUrl: string) => {
+    setCurrentBgImage(imageUrl);
+    setCurrentBgColor('bg-[rgb(255,228,233)]'); // Reset background color when image is set
+    if (id) {
+      localStorage.setItem(`event_${id}_bgImage`, imageUrl);
+      localStorage.setItem(`event_${id}_bgColor`, 'bg-[rgb(255,228,233)]');
     }
   };
   
@@ -451,7 +469,13 @@ const EventPage = () => {
   }
   
   return (
-    <div className={`min-h-screen pb-20 event-page-background ${currentBgColor} ${currentFont}`}>
+    <div className={`min-h-screen pb-20 event-page-background ${currentBgColor}`} 
+      style={{
+        backgroundImage: currentBgImage || 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm shadow-sm">
         <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -476,10 +500,14 @@ const EventPage = () => {
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/login">
-                <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">Log in</Button>
+                <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">
+                  Log in
+                </Button>
               </Link>
-              <Link to="/signup">
-                <Button variant="airbnb" className="rounded-full">Sign up</Button>
+              <Link to="/create-event">
+                <Button variant="airbnb" className="rounded-full flex items-center gap-2">
+                  <span>Try Wisha - It's Free!</span>
+                </Button>
               </Link>
             </div>
           )}
@@ -490,7 +518,7 @@ const EventPage = () => {
         {/* Header with Title and Controls */}
         <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center text-center md:text-left" ref={titleRef}>
           <div className="mb-4 md:mb-0 w-full">
-            <h2 className="text-2xl font-bold">{event?.title}</h2>
+            <h2 className={`text-2xl font-bold ${currentFont}`}>{event?.title}</h2>
             <p className="text-gray-500">
               {messages.length} messages shared with {host?.name}
             </p>
@@ -504,13 +532,17 @@ const EventPage = () => {
                 onFontChange={handleFontChange}
                 currentBgColor={currentBgColor}
                 onBgColorChange={handleBgColorChange}
+                currentBgImage={currentBgImage}
+                onBgImageChange={handleBgImageChange}
               />
             )}
           </div>
         </div>
         
         <div className="animate-fade-in">
-          {messages.length === 0 ? (
+          {isLoading ? (
+            <MessageSkeletonGrid />
+          ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-64 h-64 mb-8">
                 <img 
@@ -567,7 +599,7 @@ const EventPage = () => {
                   ) : null}
                   
                   <div className="p-4 relative">
-                    <p className="text-gray-800">{message.content}</p>
+                    <p className={`text-gray-800 ${currentFont}`}>{message.content}</p>
                     <p className="text-right mt-3 italic font-handwriting text-gray-600">
                       ~ {messageNameMap[message.id] || message.author?.name || 'Anonymous'}
                     </p>
@@ -596,10 +628,10 @@ const EventPage = () => {
           id="add-message-button"
           onClick={() => setIsModalOpen(true)}
         >
-          <Plus className="mr-2 h-5 w-5" />
-          Add Message
+          <PenLine className="mr-2 h-5 w-5" />
+          Write a message
         </Button>
-            </div>
+      </div>
             
       {/* Custom Mobile-Friendly Modal Implementation */}
       {isModalOpen && (

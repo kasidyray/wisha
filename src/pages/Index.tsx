@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
-import { getCurrentUser } from '@/lib/data';
 import { messagesApi } from '@/lib/mock-db/api';
 import type { Message } from '@/lib/mock-db/types';
 import { eventsService } from '@/services/events';
@@ -12,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Colorful, event-themed images with minimalistic backgrounds
 const eventImages = [
@@ -161,27 +161,9 @@ const AvatarScroller = () => {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user: currentUser, isLoading } = useAuth();
   const [randomMessages, setRandomMessages] = useState<Message[]>([]);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [isLoadingEvent, setIsLoadingEvent] = useState(false);
-
-  useEffect(() => {
-    // Load current user
-    const loadUser = async () => {
-      try {
-        setLoading(true);
-        const user = await getCurrentUser();
-        setCurrentUser(user);
-      } catch (error) {
-        console.error('Error loading user:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadUser();
-  }, []);
 
   useEffect(() => {
     // Load messages for potential future use
@@ -259,7 +241,9 @@ const Index = () => {
             <span className="text-xl font-bold">Wisha</span>
           </Link>
           <div className="flex items-center gap-4">
-            {currentUser ? (
+            {isLoading ? (
+              <Spinner size="sm" />
+            ) : currentUser ? (
               <div className="flex items-center gap-4">
                 <Link to="/dashboard">
                   <Button variant="ghost" className="rounded-full text-gray-700 hover:bg-gray-100">Dashboard</Button>

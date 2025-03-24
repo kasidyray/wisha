@@ -74,7 +74,7 @@ const EventPage = () => {
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<BlobPart[]>([]);
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isLoading: isAuthLoading } = useAuth();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
@@ -601,7 +601,9 @@ const EventPage = () => {
               {event?.title}
             </h1>
           </div>
-          {currentUser ? (
+          {isAuthLoading ? (
+            <Spinner size="sm" />
+          ) : currentUser ? (
             <UserAvatar user={{
               name: currentUser.name || '',
               email: currentUser.email || '',

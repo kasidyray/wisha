@@ -67,7 +67,9 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
       if (user) {
         try {
           setIsSubmitting(true);
-          await handleCreateEvent(user.id);
+          const event = await handleCreateEvent(user.id);
+          toast.success('Event created successfully!');
+          navigate(`/events/${event.id}`);
         } catch (error) {
           console.error('Error creating event:', error);
           toast.error('Failed to create event. Please try again.');
@@ -223,7 +225,13 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
         ></div>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!isSubmitting) handleSubmit();
+        }} 
+        className="space-y-6 animate-fade-in"
+      >
         {step === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div className="mb-8">
@@ -311,8 +319,14 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
                 type="button" 
                 onClick={handleNext} 
                 className="w-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
+                disabled={isSubmitting}
               >
-                Continue
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Event...
+                  </div>
+                ) : 'Continue'}
               </Button>
             </div>
           </div>
@@ -441,6 +455,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
                 variant="outline" 
                 onClick={handleBack}
                 className="rounded-xl border-gray-200 hover:bg-gray-50"
+                disabled={isSubmitting}
               >
                 Back
               </Button>
@@ -450,10 +465,16 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
                 className="flex-1 bg-[#FF385C] hover:bg-[#FF385C]/90 text-white rounded-xl py-3 font-medium"
                 disabled={
                   !formData.email || 
-                  isCheckingUser
+                  isCheckingUser ||
+                  isSubmitting
                 }
               >
-                {isCheckingUser ? (
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating Event...
+                  </div>
+                ) : isCheckingUser ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Checking...

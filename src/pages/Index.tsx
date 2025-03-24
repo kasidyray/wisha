@@ -99,7 +99,7 @@ const AvatarScroller = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
                 style={{
-                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  filter: "grayscale(100%) contrast(1.1)",
                   transition: "filter 0.3s ease"
                 }}
               />
@@ -123,7 +123,7 @@ const AvatarScroller = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
                 style={{
-                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  filter: "grayscale(100%) contrast(1.1)",
                   transition: "filter 0.3s ease"
                 }}
               />
@@ -147,7 +147,7 @@ const AvatarScroller = () => {
                 className="w-full h-full object-cover"
                 loading="lazy"
                 style={{
-                  filter: "sepia(0.35) contrast(1.1) brightness(0.9) saturate(1.5)",
+                  filter: "grayscale(100%) contrast(1.1)",
                   transition: "filter 0.3s ease"
                 }}
               />

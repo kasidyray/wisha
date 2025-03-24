@@ -12,6 +12,7 @@ import CreateEvent from '@/pages/CreateEvent';
 import EventPage from '@/pages/EventPage';
 import TestSupabase from '@/pages/test-supabase';
 import TestStorage from '@/pages/test-storage';
+import NotFound from '@/pages/NotFound';
 
 function App() {
   return (
@@ -33,6 +34,9 @@ function App() {
               <Dashboard />
             </ProtectedRoute>
           } />
+          
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
         
         <Toaster position="top-center" />

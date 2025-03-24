@@ -300,7 +300,7 @@ const Index = () => {
                     <Spinner size="sm" className="mr-2" />
                     <span>Loading...</span>
                   </div>
-                ) : 'Preview Events'}
+                ) : 'See an example'}
               </Button>
             </div>
             

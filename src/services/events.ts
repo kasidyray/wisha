@@ -17,6 +17,7 @@ const mapDbEventToEvent = async (dbEvent: DbEvent): Promise<Event> => {
     id: dbEvent.id,
     title: dbEvent.title,
     description: dbEvent.description,
+    instructions: dbEvent.instructions || '',
     date: new Date(dbEvent.date),
     type: dbEvent.type,
     participantCount: dbEvent.participant_count,
@@ -72,6 +73,7 @@ export const eventsService = {
   async create(eventData: {
     title: string;
     description: string;
+    instructions?: string;
     date: Date;
     type: string;
     creatorId: string;
@@ -83,6 +85,7 @@ export const eventsService = {
         {
           title: eventData.title,
           description: eventData.description,
+          instructions: eventData.instructions || null,
           date: eventData.date.toISOString(),
           type: eventData.type,
           participant_count: 0,
@@ -108,22 +111,26 @@ export const eventsService = {
     eventData: {
       title?: string;
       description?: string;
+      instructions?: string;
       date?: Date;
       type?: string;
       participantCount?: number;
       itemCount?: number;
       coverImage?: string | null;
+      creatorId?: string;
     }
   ): Promise<Event | null> {
     const updates: { [key: string]: any } = { updated_at: new Date().toISOString() };
 
     if (eventData.title !== undefined) updates.title = eventData.title;
     if (eventData.description !== undefined) updates.description = eventData.description;
+    if (eventData.instructions !== undefined) updates.instructions = eventData.instructions;
     if (eventData.date !== undefined) updates.date = eventData.date.toISOString();
     if (eventData.type !== undefined) updates.type = eventData.type;
     if (eventData.participantCount !== undefined) updates.participant_count = eventData.participantCount;
     if (eventData.itemCount !== undefined) updates.item_count = eventData.itemCount;
     if (eventData.coverImage !== undefined) updates.cover_image_url = eventData.coverImage;
+    if (eventData.creatorId !== undefined) updates.creator_id = eventData.creatorId;
 
     const { data, error } = await supabase
       .from('events')

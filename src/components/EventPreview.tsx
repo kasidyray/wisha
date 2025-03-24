@@ -19,6 +19,10 @@ import {
 import { eventsApi, messagesApi } from '@/lib/mock-db/api';
 import type { Event, Message } from '@/lib/mock-db/types';
 import { X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { format } from 'date-fns';
+import { eventsService } from '@/services/events';
+import { Spinner } from '@/components/ui/spinner';
 
 // Event type options for selection
 const eventTypes = [
@@ -212,7 +216,7 @@ const EventPreview: React.FC<EventPreviewProps> = ({
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                <Spinner size="lg" />
               </div>
             ) : !currentEvent ? (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
@@ -243,7 +247,11 @@ const EventPreview: React.FC<EventPreviewProps> = ({
                     <div>
                       <h2 className="text-2xl font-bold mb-1">{currentEvent.title}</h2>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <span className="px-2 py-0.5 bg-gray-100 rounded-full">{currentEvent.type}</span>
+                        <span className="px-2 py-0.5 bg-gray-100 rounded-full">
+                          {currentEvent.type.split('-').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                          ).join(' ')}
+                        </span>
                         <span>•</span>
                         <span>{new Date(currentEvent.date).toLocaleDateString()}</span>
                       </div>

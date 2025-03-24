@@ -4,20 +4,25 @@ import { toast } from 'sonner';
 import { authService } from '@/services/auth';
 import type { User } from '@/lib/mock-db/types';
 import { Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
-  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
-  logout: () => void;
-  signup: (email: string, password: string, name: string, redirectTo?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ user: User } | undefined>;
+  logout: () => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<{ user: User } | undefined>;
   checkUserExists: (email: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,54 +56,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string, redirectTo?: string) => {
+  const login = async (email: string, password: string) => {
     try {
-      const result = await authService.signIn(email, password);
-      
-      // Store user data
-      setUser(result.profile);
-      
-      // Fetch and store the session
-      const userSession = await authService.getSession();
-      setSession(userSession);
-      
-      toast.success('Welcome back!');
-      
-      // Only redirect if redirectTo is provided
-      if (redirectTo) {
-        navigate(redirectTo);
-      }
+      const { data: { user, session }, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Get additional user data
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      // Update local state
+      setUser(userData);
+      setSession(session);
+
+      return { user: userData };
     } catch (error) {
-      console.error('Login failed:', error);
-      toast.error('Invalid email or password');
+      console.error('Error logging in:', error);
       throw error;
     }
   };
 
-  const signup = async (email: string, password: string, name: string, redirectTo?: string) => {
+  const signup = async (email: string, password: string, name: string) => {
     try {
-      const result = await authService.signUp({ email, password, name });
-      
-      // Store user data
-      setUser(result.profile);
-      
-      // Fetch and store the session
-      const userSession = await authService.getSession();
-      setSession(userSession);
-      
-      toast.success('Account created successfully!');
-      
-      // Only redirect if redirectTo is provided
-      if (redirectTo) {
-        navigate(redirectTo);
-      }
+      const { data: { user, session }, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Create user profile
+      const { data: userData, error: profileError } = await supabase
+        .from('users')
+        .insert([
+          {
+            id: user.id,
+            name,
+            email,
+          },
+        ])
+        .select()
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Update local state
+      setUser(userData);
+      setSession(session);
+
+      return { user: userData };
     } catch (error) {
-      console.error('Signup failed:', error);
-      if (error instanceof Error && error.message.includes('already exists')) {
-        toast.error('This email is already registered');
-      } else {
-        toast.error('Failed to create account. Please try again.');
-      }
+      console.error('Error signing up:', error);
       throw error;
     }
   };
@@ -130,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);

@@ -4,13 +4,19 @@ import { Button } from './ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { FormControl, FormLabel } from './ui/form';
+import { Textarea } from './ui/textarea';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { eventsService } from '../services/events';
 
 interface EventFormProps {
-  onSubmit: (eventData: any) => void;
+  onSubmit: (eventData: any) => Promise<any>;
 }
 
 const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
   const { user, checkUserExists, login, signup } = useAuth();
+  const navigate = useNavigate();
   
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -20,11 +26,12 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
     firstName: user?.name?.split(' ')[0] || '',
     lastName: user?.name?.split(' ')[1] || '',
     password: '',
+    instructions: '',
   });
   
   const [userExists, setUserExists] = useState<boolean | null>(user ? true : null);
   const [isCheckingUser, setIsCheckingUser] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Reset userExists when email changes
   useEffect(() => {
@@ -41,7 +48,6 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
     // Reset userExists when email changes
     if (name === 'email') {
       setUserExists(null);
-      setIsEditingEmail(true);
     }
   };
   
@@ -53,38 +59,48 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
     if (step === 1) {
       // Validate step 1
       if (!formData.eventName || !formData.eventType) {
+        toast.error('Please fill in all required fields');
         return;
       }
       
       // If user is already logged in, submit directly
       if (user) {
-        onSubmit(formData);
+        try {
+          setIsSubmitting(true);
+          await handleCreateEvent(user.id);
+        } catch (error) {
+          console.error('Error creating event:', error);
+          toast.error('Failed to create event. Please try again.');
+        } finally {
+          setIsSubmitting(false);
+        }
         return;
       }
       
       setStep(2);
     } else if (step === 2) {
-      if (!formData.email) return;
+      if (!formData.email) {
+        toast.error('Please enter your email');
+        return;
+      }
       
-      // Always check email when Next is clicked in step 2
+      // Check if user exists when Next is clicked
       if (userExists === null) {
         setIsCheckingUser(true);
         try {
           const exists = await checkUserExists(formData.email);
           setUserExists(exists);
-          setIsEditingEmail(false);
           setIsCheckingUser(false);
-          // Don't proceed yet - let the UI update first
-          return;
         } catch (error) {
           console.error('Error checking user:', error);
           setUserExists(false);
           setIsCheckingUser(false);
-          return;
+          toast.error('Failed to check email. Please try again.');
         }
+        return;
       }
       
-      // If already checked and auth fields are filled, submit
+      // If we have all required fields, proceed with submission
       if (userExists !== null && 
          ((userExists === true && formData.password) || 
           (userExists === false && formData.firstName && formData.password))) {
@@ -96,32 +112,63 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
   const handleBack = () => {
     setStep(step - 1);
   };
+
+  const handleCreateEvent = async (userId: string) => {
+    const eventData = {
+      title: formData.eventName,
+      description: `Welcome to ${formData.eventName}`,
+      instructions: formData.instructions,
+      date: new Date(),
+      type: formData.eventType,
+      participantCount: 0,
+      itemCount: 0,
+      coverImage: '',
+      creatorId: userId,
+    };
+
+    const event = await eventsService.create(eventData);
+    return event;
+  };
   
   const handleSubmit = async () => {
-    // Don't proceed if still checking or if required fields are missing
-    if (isCheckingUser || userExists === null) {
+    if (isCheckingUser || userExists === null || isSubmitting) {
       return;
     }
     
-    // First authenticate or create user account
+    setIsSubmitting(true);
+    
     try {
+      let userId: string;
+      
       if (userExists) {
-        // Login user with explicit redirect to avoid automatic redirects
-        await login(formData.email, formData.password, '/create-event');
+        // Login existing user
+        const result = await login(formData.email, formData.password);
+        if (!result?.user?.id) {
+          throw new Error('Failed to get user ID after login');
+        }
+        userId = result.user.id;
       } else {
-        // Register user with explicit redirect to avoid automatic redirects
+        // Register new user
         const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-        await signup(formData.email, formData.password, fullName, '/create-event');
+        const result = await signup(formData.email, formData.password, fullName);
+        if (!result?.user?.id) {
+          throw new Error('Failed to get user ID after signup');
+        }
+        userId = result.user.id;
       }
       
-      // Add a small delay to ensure auth state is updated
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Create event with the user's ID
+      const event = await handleCreateEvent(userId);
       
-      // Then submit event data
-      onSubmit(formData);
+      // Show success message
+      toast.success('Event created successfully!');
+      
+      // Navigate to event page
+      navigate(`/events/${event.id}`);
     } catch (error) {
-      console.error('Authentication error:', error);
-      // Don't submit if auth fails
+      console.error('Error during submission:', error);
+      toast.error(userExists ? 'Login failed. Please check your credentials.' : 'Registration failed. Please try again.');
+      setIsSubmitting(false);
     }
   };
   
@@ -176,7 +223,7 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
         ></div>
       </div>
       
-      <form className="space-y-6 animate-fade-in">
+      <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
         {step === 1 && (
           <div className="space-y-5 animate-fade-in">
             <div className="mb-8">
@@ -240,6 +287,23 @@ const EventForm: React.FC<EventFormProps> = ({ onSubmit }) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div>
+              <label htmlFor="instructions" className="block mb-1.5 text-sm font-medium">
+                Instructions (Optional)
+              </label>
+              <Textarea
+                id="instructions"
+                name="instructions"
+                placeholder="Add special instructions or notes for this event..."
+                value={formData.instructions}
+                onChange={handleChange}
+                className="w-full rounded-xl border-gray-200 focus-visible:ring-primary resize-y min-h-[100px]"
+              />
+              <p className="text-xs text-gray-500 mt-1.5">
+                Provide any additional information or guidelines for event participants
+              </p>
             </div>
             
             <div className="pt-6">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Send, Mic, X, Calendar, Users, Gift, MessageSquare, Image as ImageIcon, Plus, FileImage, PenLine } from 'lucide-react';
+import { Send, Mic, X, Calendar, Users, Gift, MessageSquare, Image as ImageIcon, Plus, FileImage, PenLine, MicOff, Disc } from 'lucide-react';
+import { GifIcon } from '@/components/icons/GifIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -19,9 +20,11 @@ import { toast } from 'sonner';
 import { eventsService } from '@/services/events';
 import { messagesService } from '@/services/messages';
 import { usersService } from '@/services/users';
+import { activitiesService } from '@/services/activities';
 import { uploadMessageMedia } from '@/lib/data';
 import type { Message, Event, User } from '@/lib/mock-db/types';
 import { MessageSkeletonGrid } from '@/components/MessageSkeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +33,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import EmptyStateIcon from '@/components/icons/EmptyStateIcon';
 
 const GIPHY_API_KEY = 'hpvZycW22qCjn5cRM1xtWB8NKq4dQ2My'; // Replace with your actual Giphy API key when deploying
+
+// Add this to the global CSS or a component-specific style
+const pulseAnimation = `
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-recording {
+  animation: pulse 1.5s infinite;
+  background-color: rgba(255, 56, 92, 0.15);
+}
+`;
 
 const EventPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -238,8 +265,16 @@ const EventPage = () => {
         media
       });
       
-      // Reset form and add message to list
+      // Create activity record for the new message
       if (message) {
+        const userId = currentUser?.id || "00000000-0000-0000-0000-000000000000";
+        await activitiesService.create({
+          type: 'new_message',
+          eventId: event.id,
+          userId: userId,
+          details: newMessage.name || currentUser?.name
+        });
+        
         setMessages((prev) => [message, ...prev]);
         setNewMessage({
           name: currentUser?.name || newMessage.name || '',
@@ -468,11 +503,13 @@ const EventPage = () => {
       // Construct search term based on event title and type
       const searchTerm = `${event.type || ''} ${event.title || ''}`.trim();
       if (searchTerm) {
-        setGifSearchTerm(searchTerm);
-        searchGifs(searchTerm);
+        // Set the search term internally but don't update the input field
+        const initialSearchTerm = searchTerm;
+        setGifSearchTerm(''); // Keep input empty with placeholder visible
+        searchGifs(initialSearchTerm); // Use the event-based term for initial search
       } else {
         // Fallback to general celebration GIFs
-        setGifSearchTerm('celebration');
+        setGifSearchTerm('');
         searchGifs('celebration');
       }
     }
@@ -494,13 +531,24 @@ const EventPage = () => {
     };
   }, [isModalOpen]);
 
+  useEffect(() => {
+    // Add the animation style to the document
+    const styleElement = document.createElement('style');
+    styleElement.textContent = pulseAnimation;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      // Clean up on component unmount
+      document.head.removeChild(styleElement);
+    };
+  }, []);
+
   if (!event || !host) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         {isLoading ? (
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-lg">Loading event...</p>
+            <Spinner size="lg" withText={true} />
           </div>
         ) : loadingError ? (
           <div className="text-center max-w-md">
@@ -540,7 +588,7 @@ const EventPage = () => {
       }}>
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container max-w-6xl mx-auto px-4 py-2 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
             <Link to="/" className="inline-flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
@@ -548,8 +596,8 @@ const EventPage = () => {
               </div>
               <span className="text-xl font-bold">Wisha</span>
             </Link>
-            <div className="h-6 w-px bg-gray-200" />
-            <h1 className={`text-lg font-medium transition-opacity duration-200 ${isTitleVisible ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="hidden md:block h-6 w-px bg-gray-200" />
+            <h1 className={`hidden md:block text-lg font-medium transition-opacity duration-200 ${isTitleVisible ? 'opacity-0' : 'opacity-100'}`}>
               {event?.title}
             </h1>
           </div>
@@ -568,7 +616,8 @@ const EventPage = () => {
               </Link>
               <Link to="/create-event">
                 <Button variant="airbnb" className="rounded-full flex items-center gap-2">
-                  <span>Try Wisha - It's Free!</span>
+                  <span className="hidden md:inline">Try Wisha - It's Free!</span>
+                  <span className="md:hidden">Try Wisha</span>
                 </Button>
               </Link>
             </div>
@@ -581,9 +630,17 @@ const EventPage = () => {
         <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-center text-center md:text-left" ref={titleRef}>
           <div className="mb-4 md:mb-0 w-full">
             <h2 className={`text-2xl font-bold ${currentFont}`}>{event?.title}</h2>
-            <p className="text-gray-500">
-              {messages.length} messages shared with {host?.name}
-            </p>
+            <div className="text-gray-500">
+              {event.instructions ? (
+                <div className="mt-2 text-gray-700 text-sm italic">
+                  {event.instructions}
+                </div>
+              ) : messages.length > 0 ? (
+                `${messages.length} messages shared with ${host?.name}`
+              ) : (
+                `No messages shared yet, be the first!`
+              )}
+            </div>
           </div>
           
           <div className="flex items-center justify-center md:justify-end gap-3 w-full md:w-auto">
@@ -606,16 +663,16 @@ const EventPage = () => {
             <MessageSkeletonGrid />
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-64 h-64 mb-8">
+              <div className="w-48 h-48 mb-8">
                 <img 
-                  src="https://illustrations.popsy.co/amber/taking-notes.svg" 
-                  alt="No messages"
-                  className="w-full h-full"
+                  src="https://illustrations.popsy.co/red/communication.svg" 
+                  alt="Start a conversation"
+                  className="w-full h-full object-contain"
                 />
               </div>
-              <h3 className="text-2xl font-semibold mb-4">No messages yet</h3>
-              <p className="text-gray-500 mb-8 max-w-md">
-                Be the first to write a message for {host?.name}!
+              <h3 className="text-2xl font-semibold mb-2">No messages yet</h3>
+              <p className="text-gray-500 mb-2 max-w-md">
+                Be the first to {event.title?.toLowerCase().startsWith('write') ? event.title.toLowerCase() : `share a message for ${event.title}`}.
               </p>
             </div>
           ) : (
@@ -682,11 +739,8 @@ const EventPage = () => {
           className="rounded-full shadow-xl px-8 py-7 text-base font-medium 
                     hover:scale-105 transition-all duration-300 
                     bg-gradient-to-r from-[#FF385C] to-[#FF385C]/90
-                    animate-pulse-soft
-                    relative after:absolute after:inset-0 after:rounded-full 
-                    after:shadow-[0_0_15px_rgba(255,56,92,0.5)] 
-                    after:z-[-1] after:opacity-70 after:animate-ping-slow
-                    flex items-center justify-center"
+                    animate-border-glow
+                    flex items-center"
           id="add-message-button"
           onClick={() => setIsModalOpen(true)}
         >
@@ -870,7 +924,7 @@ const EventPage = () => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <label className="p-2 rounded-full text-[#FF385C] hover:bg-[#FF385C]/10 cursor-pointer transition-colors">
+                              <label className="p-2 rounded-full text-[#FF385C] hover:bg-[#FF385C]/10 cursor-pointer transition-colors flex items-center justify-center w-10 h-10">
                                 <ImageIcon className="h-5 w-5" />
                                 <input 
                                   type="file" 
@@ -892,10 +946,10 @@ const EventPage = () => {
                               <Button 
                                 type="button"
                                 variant="ghost"
-                                className="p-2 rounded-full text-[#FF385C] hover:bg-[#FF385C]/10"
+                                className="p-2 rounded-full text-[#FF385C] hover:bg-[#FF385C]/10 flex items-center justify-center w-10 h-10"
                                 onClick={() => setIsGifSearchOpen(true)}
                               >
-                                <FileImage className="h-5 w-5" />
+                                <GifIcon className="h-5 w-5 text-[#FF385C] fill-current" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
@@ -910,10 +964,14 @@ const EventPage = () => {
                               <Button 
                                 type="button"
                                 variant="ghost"
-                                className={`p-2 rounded-full ${isRecordingAudio ? 'bg-red-100 text-red-500' : 'text-[#FF385C] hover:bg-[#FF385C]/10'}`}
+                                className={`p-2 rounded-full flex items-center justify-center w-10 h-10 ${isRecordingAudio ? 'bg-red-100 text-red-500 animate-recording' : 'text-[#FF385C] hover:bg-[#FF385C]/10'}`}
                                 onClick={isRecordingAudio ? stopAudioRecording : startAudioRecording}
                               >
-                                <Mic className="h-5 w-5" />
+                                {isRecordingAudio ? (
+                                  <Disc className="h-5 w-5 animate-spin" />
+                                ) : (
+                                  <Mic className="h-5 w-5" />
+                                )}
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
@@ -925,10 +983,21 @@ const EventPage = () => {
                       
                       <Button 
                         type="submit" 
-                        className="rounded-full bg-[#FF385C] hover:bg-[#FF385C]/90 text-white font-semibold px-5"
-                        disabled={!newMessage.message.trim()}
+                        variant="airbnb"
+                        className="rounded-full px-6"
+                        disabled={isSubmitting}
                       >
-                        Post
+                        {isSubmitting ? (
+                          <div className="flex items-center">
+                            <Spinner size="sm" className="mr-2" />
+                            Posting...
+                          </div>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Post
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>

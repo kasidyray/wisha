@@ -28,11 +28,12 @@ const CreateEvent = () => {
       
       // Create the event
       const newEvent = await eventsService.create({
-        title: eventData.eventName,
-        type: eventData.eventType,
+        title: eventData.eventName || eventData.title,
+        type: eventData.eventType || eventData.type,
         date: eventData.eventDate ? new Date(eventData.eventDate) : new Date(),
         creatorId: currentUser?.id || '00000000-0000-0000-0000-000000000000', // Use guest ID if not logged in
-        description: eventData.message || `Welcome to ${eventData.eventName}`,
+        description: eventData.message || eventData.description || `Welcome to ${eventData.eventName || eventData.title}`,
+        instructions: eventData.instructions || null,
         coverImage: coverImageUrl
       });
       
@@ -119,7 +120,7 @@ const CreateEvent = () => {
       <div className="hidden lg:block w-px bg-gray-200 h-full"></div>
       
       {/* Right Column - Form */}
-      <div className="w-full lg:w-1/2 px-4 py-12 flex items-center justify-center">
+      <div className="w-full lg:w-1/2 px-4 py-12 flex items-start lg:items-center justify-center">
         <div className="w-full max-w-lg space-y-12">
           <button 
             onClick={() => navigate(-1)} 

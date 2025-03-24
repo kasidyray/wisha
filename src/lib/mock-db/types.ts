@@ -13,6 +13,7 @@ export interface DBEvent {
   id: string;
   title: string;
   description: string;
+  instructions?: string; // Optional instructions field
   date: Date;
   type: string;
   participantCount: number;

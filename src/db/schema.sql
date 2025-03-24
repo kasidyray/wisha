@@ -15,6 +15,7 @@ CREATE TABLE public.events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT NOT NULL,
+  instructions TEXT NULL, -- Optional instructions for event participants
   date TIMESTAMP WITH TIME ZONE NOT NULL,
   type TEXT NOT NULL,
   participant_count INTEGER DEFAULT 0 NOT NULL,

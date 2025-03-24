@@ -1,11 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/ui/avatar';
 import { getCurrentUser } from '@/lib/data';
 import { messagesApi } from '@/lib/mock-db/api';
 import type { Message } from '@/lib/mock-db/types';
-import EventPreview from '@/components/EventPreview';
+import { eventsService } from '@/services/events';
+import { Loader } from '@/components/ui/loader';
+import { supabase } from '@/lib/supabase';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import { Spinner } from '@/components/ui/spinner';
 
 // Colorful, event-themed images with minimalistic backgrounds
 const eventImages = [
@@ -73,8 +79,8 @@ const AvatarScroller = () => {
   // Calculate the number of images needed based on viewport width
   // Wider images with minimal spacing between them
   return (
-    <div className="fixed bottom-0 left-0 right-0 w-full overflow-hidden h-[250px] bg-gradient-to-t from-white/95 via-white/90 to-transparent z-10">
-      <div ref={scrollerRef} className="flex overflow-x-hidden py-0 w-full absolute bottom-0 left-0 scrollbar-hide">
+    <div className="fixed bottom-0 left-0 right-0 w-full overflow-hidden h-[220px] md:h-[250px] bg-gradient-to-t from-white/95 via-white/90 to-transparent z-10">
+      <div ref={scrollerRef} className="flex overflow-x-hidden py-0 w-full absolute bottom-[-40px] md:bottom-0 left-0 scrollbar-hide">
         <div className="flex space-x-3 whitespace-nowrap px-2">
           {/* First set of images */}
           {eventImages.map((imageUrl, index) => (
@@ -82,10 +88,8 @@ const AvatarScroller = () => {
               key={`event-${index}`} 
               className={`avatar-container inline-block ${
                 avatarShapes[index % avatarShapes.length]
-              } shadow-md overflow-hidden`}
+              } shadow-md overflow-hidden w-[250px] md:w-[280px] h-[200px] md:h-[220px]`}
               style={{
-                width: `280px`,
-                height: `220px`,
                 transform: `translateY(${(index % 2) * 8}px)`
               }}
             >
@@ -108,10 +112,8 @@ const AvatarScroller = () => {
               key={`event-dup-${index}`} 
               className={`avatar-container inline-block ${
                 avatarShapes[index % avatarShapes.length]
-              } shadow-md overflow-hidden`}
+              } shadow-md overflow-hidden w-[250px] md:w-[280px] h-[200px] md:h-[220px]`}
               style={{
-                width: `280px`,
-                height: `220px`,
                 transform: `translateY(${(index % 2) * 8}px)`
               }}
             >
@@ -134,10 +136,8 @@ const AvatarScroller = () => {
               key={`event-dup2-${index}`} 
               className={`avatar-container inline-block ${
                 avatarShapes[index % avatarShapes.length]
-              } shadow-md overflow-hidden`}
+              } shadow-md overflow-hidden w-[250px] md:w-[280px] h-[200px] md:h-[220px]`}
               style={{
-                width: `280px`,
-                height: `220px`,
                 transform: `translateY(${(index % 2) * 8}px)`
               }}
             >
@@ -160,9 +160,11 @@ const AvatarScroller = () => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
   const [randomMessages, setRandomMessages] = useState<Message[]>([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(false);
 
   useEffect(() => {
     // Load current user
@@ -203,6 +205,42 @@ const Index = () => {
     loadMessages();
   }, []);
 
+  // Function to navigate to a random event
+  const handlePreviewEvents = async () => {
+    setIsLoadingEvent(true);
+    try {
+      // Get all events with their message counts using Supabase
+      const { data: eventsWithCounts, error } = await supabase
+        .from('events')
+        .select(`
+          id,
+          title,
+          messages:messages(count)
+        `)
+        .not('messages', 'is', null);
+
+      if (error) throw error;
+
+      // Filter events with 6 or more messages
+      const qualifiedEvents = eventsWithCounts.filter(event => 
+        event.messages[0]?.count >= 6
+      );
+      
+      // If there are qualified events, select a random one and navigate to it
+      if (qualifiedEvents && qualifiedEvents.length > 0) {
+        const randomEvent = qualifiedEvents[Math.floor(Math.random() * qualifiedEvents.length)];
+        navigate(`/events/${randomEvent.id}`);
+      } else {
+        console.error('No events found with 6 or more messages');
+        // Could add a toast notification here
+      }
+    } catch (error) {
+      console.error('Error fetching random event:', error);
+    } finally {
+      setIsLoadingEvent(false);
+    }
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden flex flex-col bg-gradient-to-br from-[#FAFAFA] via-white to-[#F0F4F8] text-gray-900 font-quicklnk relative">
       {/* Minimal soft gradients for visual interest */}
@@ -212,7 +250,7 @@ const Index = () => {
               </div>
       
       {/* Header */}
-      <header className="py-4 px-4 z-20 relative">
+      <header className="py-2 md:py-4 px-4 z-20 relative">
         <div className="container max-w-6xl mx-auto flex justify-between items-center">
           <Link to="/" className="inline-flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
@@ -235,7 +273,7 @@ const Index = () => {
                 </Link>
                 <Link to="/signup">
                   <Button variant="airbnb" className="rounded-full">Sign up</Button>
-            </Link>
+                </Link>
               </>
             )}
           </div>
@@ -243,7 +281,7 @@ const Index = () => {
       </header>
       
       {/* Hero Section */}
-      <div className="flex-1 flex flex-col justify-center relative pb-[260px]">
+      <div className="flex-1 flex flex-col justify-center items-center relative pb-[240px] md:pb-[260px] my-8 md:my-0">
         {/* Centered Hero Text */}
         <div className="container max-w-6xl mx-auto px-4 text-center z-10 relative">
           <div className="mx-auto max-w-3xl">
@@ -266,11 +304,20 @@ const Index = () => {
                   Create Event — It's Free
                 </Button>
               </Link>
-              <EventPreview 
-                buttonVariant="outline"
-                buttonSize="lg"
-                className="px-8 text-base py-6"
-              />
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="rounded-full px-8 text-base py-6 border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                onClick={handlePreviewEvents}
+                disabled={isLoadingEvent}
+              >
+                {isLoadingEvent ? (
+                  <div className="flex items-center justify-center">
+                    <Spinner size="sm" className="mr-2" />
+                    <span>Loading...</span>
+                  </div>
+                ) : 'Preview Events'}
+              </Button>
             </div>
             
             {/* Stats */}

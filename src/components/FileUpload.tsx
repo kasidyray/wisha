@@ -3,6 +3,9 @@ import { storageService, FileUploadResult } from '@/services/storage';
 import { Button } from '@/components/ui/button';
 import { Loader2, Upload, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
 
 interface FileUploadProps {
   onUploadComplete?: (result: FileUploadResult) => void;
@@ -130,7 +133,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           >
             {isUploading ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Spinner size="sm" className="mr-2" />
                 <span>Uploading...</span>
               </>
             ) : (

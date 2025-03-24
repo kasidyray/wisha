@@ -1,0 +1,19 @@
+{
+  "name": "Wisha",
+  "short_name": "Wisha",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#FF385C",
+  "background_color": "#ffffff",
+  "display": "standalone"
+} 

@@ -40,6 +40,7 @@ export interface Database {
           id: string
           title: string
           description: string
+          instructions: string | null
           date: string
           type: string
           participant_count: number
@@ -53,6 +54,7 @@ export interface Database {
           id?: string
           title: string
           description: string
+          instructions?: string | null
           date: string
           type: string
           participant_count?: number
@@ -66,6 +68,7 @@ export interface Database {
           id?: string
           title?: string
           description?: string
+          instructions?: string | null
           date?: string
           type?: string
           participant_count?: number

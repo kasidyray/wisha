@@ -20,6 +20,13 @@ import type { Event, Activity } from '@/lib/mock-db/types';
 import type { User } from '@/lib/mock-db/types';
 import { Loader } from '@/components/ui/loader';
 import { activitiesService } from '@/services/activities';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { eventsService } from '@/services/events';
+import { messagesService } from '@/services/messages';
+import type { Message } from '@/lib/mock-db/types';
+import DashboardSkeleton from '@/components/DashboardSkeleton';
 
 const Dashboard = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -85,11 +92,7 @@ const Dashboard = () => {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader className="h-12 w-12 border-4 border-[#FF385C]" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!currentUser) {
@@ -109,7 +112,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-gray-50">
       {/* Header */}
       <header className="border-b bg-white shadow-sm">
-        <div className="container max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="container max-w-6xl mx-auto px-4 py-2 md:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Link to="/" className="inline-flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-[#FF385C] flex items-center justify-center text-white font-bold">
@@ -243,22 +246,22 @@ const Dashboard = () => {
                               }
                             }}
                           />
-                          <div className="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-xs font-medium shadow-sm">
-                            {event.type}
+                          <div className="absolute top-4 right-4 bg-white py-1 px-3 rounded-full text-xs text-capitalize font-medium shadow-sm">
+                            {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
                           </div>
                         </div>
                         <CardContent className="p-5">
-                          <h3 className="text-lg font-semibold mb-1 truncate">{event.title}</h3>
-                          <p className="text-gray-500 text-sm mb-3">Created {format(new Date(event.createdAt), 'MMMM dd, yyyy')}</p>
+                          <p className="text-gray-500 text-sm mb-1">Created {format(new Date(event.createdAt), 'MMMM dd, yyyy')}</p>
+                          <h3 className="text-lg font-semibold mb-6 truncate">{event.title}</h3>
                           <div className="flex justify-between text-sm text-gray-600">
                             <div className="flex items-center">
                               <MessageSquare className="h-4 w-4 mr-1" />
                               {messageCountByEvent[event.id] || 0} messages
                             </div>
-                            <div className="flex items-center">
+                            {/* <div className="flex items-center">
                               <Clock className="h-4 w-4 mr-1" />
                               {formatDistanceToNow(new Date(event.updatedAt || event.createdAt))} ago
-                            </div>
+                            </div> */}
                           </div>
                         </CardContent>
                       </Card>

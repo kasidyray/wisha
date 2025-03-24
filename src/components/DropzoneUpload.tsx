@@ -4,6 +4,9 @@ import { storageService, FileUploadResult } from '@/services/storage';
 import { Loader2, Upload, File, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/spinner';
 
 interface DropzoneUploadProps {
   onUploadComplete?: (results: FileUploadResult[]) => void;
@@ -227,7 +230,7 @@ export const DropzoneUpload: React.FC<DropzoneUploadProps> = ({
             >
               {isUploading ? (
                 <div className="flex items-center justify-center gap-2">
-                  <Loader2 className="animate-spin" size={16} />
+                  <Spinner size="sm" className="mr-2" />
                   <span>
                     Uploading... {uploadProgress > 0 ? `${uploadProgress}%` : ''}
                   </span>
